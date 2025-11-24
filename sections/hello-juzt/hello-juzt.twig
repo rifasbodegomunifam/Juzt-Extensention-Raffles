@@ -1,0 +1,20 @@
+{# Sección: Hello Juzt #}
+{% set bg_color = section.settings.background_color ?: '#1a1a1a' %}
+<div class="hello-juzt-section" style="--bg-color: {{ bg_color }};">
+    <div class="hello-juzt-section__content">
+        <h2 class="hello-juzt-section__title">
+            {{ section.settings.title }}
+        </h2>
+        
+        {% if section.settings.subtitle %}
+            <p class="hello-juzt-section__subtitle">
+                {{ section.settings.subtitle }}
+            </p>
+        {% endif %}
+        
+        <div class="hello-juzt-section__status">
+            <p class="hello-juzt-section__status-message">✅ Extension loaded successfully!</p>
+            <p class="hello-juzt-section__status-id">Section ID: hello-juzt</p>
+        </div>
+    </div>
+</div>

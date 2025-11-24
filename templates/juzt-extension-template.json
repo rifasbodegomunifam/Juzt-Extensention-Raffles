@@ -1,0 +1,40 @@
+{
+    "name": "juzt-extension-template",
+    "description": "Template for Juzt Studio Extension",
+    "template": true,
+    "order": [
+        "hello-juzt",
+        "section_1763918312434"
+    ],
+    "sections": {
+        "hello-juzt": {
+            "section_id": "hello-juzt",
+            "settings": {
+                "title": "Testing Extension Section!",
+                "subtitle": "This is a template that works from a juzt extension.",
+                "background_color": "#ac7d6c"
+            },
+            "blocks": []
+        },
+        "section_1763918312434": {
+            "section_id": "main-hero",
+            "settings": {
+                "gradient_color_1": "#c23d3d",
+                "gradient_color_2": "#9e882e",
+                "max_width": "container-fluid"
+            },
+            "blocks": [
+                {
+                    "type": "slide",
+                    "settings": {
+                        "title": "Welcome to Juzt Orbit!",
+                        "subtitle": "Your journey starts here!",
+                        "button_text": "Get Started!",
+                        "button_link": "#!"
+                    }
+                }
+            ]
+        }
+    },
+    "post_type": "page"
+}
