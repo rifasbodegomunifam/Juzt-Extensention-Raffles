@@ -62,14 +62,6 @@ register_activation_hook(__FILE__, function() {
  * Limpiar cache al desactivar
  */
 register_deactivation_hook(__FILE__, function() {
-    // Limpiar cache del registry
-    if (class_exists('Juztstack\JuztStudio\Community\Core')) {
-        $core = \Juztstack\JuztStudio\Community\Core::get_instance();
-        if ($core && isset($core->extension_registry)) {
-            $core->extension_registry->clear_cache();
-            error_log('✅ Registry cache cleared on deactivation');
-        }
-    }
-    
+    error_log('🔌 Plugin deactivated: ' . plugin_basename(__FILE__));
     flush_rewrite_rules();
 });
