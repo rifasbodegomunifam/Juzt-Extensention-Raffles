@@ -1,8 +1,11 @@
 // juzt-extension-template/vite.config.js
 
 import { defineConfig } from 'vite';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+
+  plugins: [tailwindcss()],
 
   server: {
     cors: true,
@@ -16,7 +19,7 @@ export default defineConfig({
     rollupOptions: {
       
       input: {
-        
+        raffleAdmin:'src/js/raffle.js', 
         script: 'src/js/index.js', 
         style: 'src/css/index.css',
       },

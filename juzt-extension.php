@@ -47,10 +47,52 @@ return [
         'production' => [
             'js' => [
                 'juzt-extension-template-script' => '/js/script.js',
+                'juzt-raffle-admin-script'       => '/js/raffleAdmin.js'
             ],
             'css' => [
                 'juzt-extension-template-style' => '/css/style.css',
             ],
         ],
+    ],
+    'adminAssets' => [
+        'development' => [
+            'js' => [
+                'juzt-raffle-admin-script'       => '/src/js/raffle.js'
+            ],
+            'css' => [
+                'juzt-extension-template-style' => '',
+            ],
+            // ✅ NUEVO: Localize scripts
+            'localize' => [
+                'juzt-raffle-admin-script' => [ // ← Handle del script
+                    'object_name' => 'juztRaffleAdmin',
+                    'data' => [
+                        'ajaxUrl' => admin_url('admin-ajax.php'),
+                        'nonce' => wp_create_nonce('juzt_raffle_nonce'),
+                        'adminUrl' => admin_url('admin.php?page=juzt-raffle')
+                    ]
+                ]
+            ]
+        ],
+        'production' => [
+            'js' => [
+                'juzt-raffle-admin-script'       => '/js/raffleAdmin.js'
+            ],
+            'css' => [
+                'juzt-extension-template-style' => '/css/style.css',
+            ],
+            // ✅ NUEVO: Localize scripts
+            'localize' => [
+                'juzt-raffle-admin-script' => [ // ← Handle del script
+                    'object_name' => 'juztRaffleAdmin',
+                    'data' => [
+                        'ajaxUrl' => admin_url('admin-ajax.php'),
+                        'nonce' => wp_create_nonce('juzt_raffle_nonce'),
+                        'adminUrl' => admin_url('admin.php?page=juzt-raffle')
+                    ]
+                ]
+            ]
+        ],
+
     ],
 ];

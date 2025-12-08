@@ -3,7 +3,7 @@
  * Plugin Name: Juzt Extension Template
  * Plugin URI: https://juztstack.com
  * Description: Template para crear extensiones de Juzt Studio Community.
- * Version: 1.0.0
+ * Version: 2.0.0
  * Author: JuztStack
  * License: MIT
  * Requires at least: 5.8
@@ -17,9 +17,10 @@ if (!defined('ABSPATH')) {
 }
 
 // Definir constantes
-define('JUZT_EXTENSION_TEMPLATE_VERSION', '1.0.0');
+define('JUZT_EXTENSION_TEMPLATE_VERSION', '2.0.0');
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH', JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/admin');
 define('JUZT_EXTENSION_DEVELOPMENT_MODE', false); // Change to false in production
 
 /**
@@ -64,4 +65,16 @@ register_activation_hook(__FILE__, function() {
 register_deactivation_hook(__FILE__, function() {
     error_log('🔌 Plugin deactivated: ' . plugin_basename(__FILE__));
     flush_rewrite_rules();
+});
+
+/***
+ * Admin page Raffles
+ */
+
+require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . "/admin/admin.config.php";
+
+new AdminConfig();
+
+add_action('admin_enqueue_scripts', function($hook) {
+    error_log("Current page hook: {$hook}");
 });
