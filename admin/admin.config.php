@@ -2,6 +2,7 @@
 
 require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH . "/functions/database.functions.php";
 require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH . "/functions/ajax.functions.php";
+require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH . "/functions/raffle.functions.php";
 
 class AdminConfig
 {
@@ -10,6 +11,8 @@ class AdminConfig
         add_action('admin_enqueue_scripts', [$this, 'addMediaLibrary']);
         add_action('admin_head', [$this, 'addStyleForAdmin']);
         add_action('admin_menu', [$this, 'addAdminPage']);
+        
+        new JuztRaffleCtp();
     }
 
     public function addMediaLibrary($hook)

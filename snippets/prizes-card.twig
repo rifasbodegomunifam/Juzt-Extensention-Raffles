@@ -1,0 +1,22 @@
+<article class="flex flex-wrap items-start gap-5 p-3 text-white bg-red-600 rounded-lg">
+    
+    {% if prize.image %}
+    <figure class="mb-0! overflow-hidden rounded-lg w-28 h-28">
+        <img class="object-cover w-full h-full" src="{{ prize.image }}" alt="{{ prize.title }}" />
+    </figure>
+    {% endif %}
+
+    <div>
+        {% if prize.title %}
+        <div>
+            <h4 class="text-xl font-bold">{{ prize.title }}</h4>
+            {% if prize.description %}
+                <h5 class="text-2xl font-bold">{{ prize.description }}</h5>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <p>{{ prize.detail }}</p>
+    </div>
+    
+</article> 

@@ -1,3 +1,4 @@
+import '../css/admin.css';
 import RaffleAdminApp from './modules/raffles/app';
 import Alpine from 'alpinejs';
 

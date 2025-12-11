@@ -1,0 +1,18 @@
+{
+    "name": "single-raffle",
+    "description": "Template for CTP Raffles",
+    "template": true,
+    "order": [
+        "main-raffle"
+    ],
+    "sections": {
+        "main-raffle": {
+            "section_id": "main-raffle",
+            "settings": {
+                "layout": "divide"
+            },
+            "blocks": []
+        }
+    },
+    "post_type": "raffle"
+}

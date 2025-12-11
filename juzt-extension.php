@@ -30,9 +30,11 @@ return [
 
     // Paths de recursos
     'paths' => [
+        'snippets_dir' => __DIR__ . '/snippets',
         'sections_dir' => __DIR__ . '/sections',
         'templates_dir' => __DIR__ . '/templates',
         'assets_url' => plugin_dir_url(__FILE__) . 'assets',
+        'plugin_dir' => __DIR__,
     ],
 
     'assets' => [
@@ -46,11 +48,10 @@ return [
         ],
         'production' => [
             'js' => [
-                'juzt-extension-template-script' => '/js/script.js',
-                'juzt-raffle-admin-script'       => '/js/raffleAdmin.js'
+                'juzt-extension-template-script' => '/js/index.js',
             ],
             'css' => [
-                'juzt-extension-template-style' => '/css/style.css',
+                'juzt-extension-template-style' => '/css/index.css',
             ],
         ],
     ],
@@ -79,7 +80,7 @@ return [
                 'juzt-raffle-admin-script'       => '/js/raffleAdmin.js'
             ],
             'css' => [
-                'juzt-extension-template-style' => '/css/style.css',
+                'juzt-extension-template-style' => '/css/raffleAdmin.css',
             ],
             // ✅ NUEVO: Localize scripts
             'localize' => [

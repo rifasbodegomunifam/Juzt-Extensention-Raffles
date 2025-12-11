@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Juzt Extension Template
  * Plugin URI: https://juztstack.com
@@ -26,9 +27,10 @@ define('JUZT_EXTENSION_DEVELOPMENT_MODE', false); // Change to false in producti
 /**
  * Verify that Juzt Studio is active
  */
-function juzt_extension_template_check_dependencies() {
+function juzt_extension_template_check_dependencies()
+{
     if (!class_exists('Juztstack\JuztStudio\Community\Core')) {
-        add_action('admin_notices', function() {
+        add_action('admin_notices', function () {
             echo '<div class="notice notice-error"><p>';
             echo '<strong>Juzt Extension Template</strong> necesita <strong>Juzt Studio Community</strong> activo.';
             echo '</p></div>';
@@ -41,12 +43,12 @@ function juzt_extension_template_check_dependencies() {
 /**
  * Verificar dependencias al activar
  */
-register_activation_hook(__FILE__, function() {
+register_activation_hook(__FILE__, function () {
     if (!juzt_extension_template_check_dependencies()) {
         deactivate_plugins(plugin_basename(__FILE__));
         wp_die('Este plugin requiere Juzt Studio Community activo.');
     }
-    
+
     // Limpiar cache del registry
     if (class_exists('Juztstack\JuztStudio\Community\Core')) {
         $core = \Juztstack\JuztStudio\Community\Core::get_instance();
@@ -55,14 +57,14 @@ register_activation_hook(__FILE__, function() {
             error_log('✅ Registry cache cleared on activation');
         }
     }
-    
+
     flush_rewrite_rules();
 });
 
 /**
  * Limpiar cache al desactivar
  */
-register_deactivation_hook(__FILE__, function() {
+register_deactivation_hook(__FILE__, function () {
     error_log('🔌 Plugin deactivated: ' . plugin_basename(__FILE__));
     flush_rewrite_rules();
 });
@@ -75,6 +77,22 @@ require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . "/admin/admin.config.php";
 
 new AdminConfig();
 
-add_action('admin_enqueue_scripts', function($hook) {
+add_action('admin_enqueue_scripts', function ($hook) {
     error_log("Current page hook: {$hook}");
+});
+
+// 2. Registrar template para el CPT
+add_filter('single_template', function ($template) {
+    global $post;
+
+    if ($post && $post->post_type === 'raffle') {
+        $plugin_template = JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/templates/single-raffle.php';
+
+        if (file_exists($plugin_template)) {
+            error_log("✅ Loading raffle template from extension");
+            return $plugin_template;
+        }
+    }
+
+    return $template;
 });
