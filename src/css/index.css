@@ -10,3 +10,19 @@
 .index {
     font-size: 14px;
 }
+
+.splide__pagination {
+    @apply relative! top-auto! bottom-auto! left-auto! right-auto! my-3!; 
+}
+
+.splide__pagination__page.is-active {
+    @apply bg-red-600!;
+}
+
+.splide__pagination__page {
+    @apply w-3.5! h-3.5!;
+}
+
+.splide__slide {
+    @apply cursor-grab!;
+}
