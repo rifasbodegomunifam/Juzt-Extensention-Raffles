@@ -59,13 +59,26 @@
                 <!-- Descripción -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
+                        Fecha de sorteo
+                    </label>
+                    <input type="datetime-local" 
+                        x-model="raffle.date"
+                        rows="4"
+                        class="block px-4 py-2 mt-1 w-full rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Describe la rifa..."
+                    ></textarea>
+                </div>
+                
+                <!-- Date raffle -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
                         Descripción
                     </label>
                     <textarea 
                         x-model="raffle.content"
                         rows="4"
                         class="block px-4 py-2 mt-1 w-full rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Describe la rifa..."
+                        placeholder="DD-MM-YYYY HH:MM:SS"
                     ></textarea>
                 </div>
                 

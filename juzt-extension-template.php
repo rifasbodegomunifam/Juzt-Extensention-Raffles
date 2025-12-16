@@ -18,11 +18,12 @@ if (!defined('ABSPATH')) {
 }
 
 // Definir constantes
-define('JUZT_EXTENSION_TEMPLATE_VERSION', '2.0.0');
+define('JUZT_EXTENSION_TEMPLATE_VERSION', '2.1.0');
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH', JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/admin');
-define('JUZT_EXTENSION_DEVELOPMENT_MODE', false); // Change to false in production
+define('JUZT_EXTENSION_TEMPLATE_PLUGIN_SITE_PATH', JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/site');
+define('JUZT_EXTENSION_DEVELOPMENT_MODE', true); // Change to false in production
 
 /**
  * Verify that Juzt Studio is active
@@ -75,6 +76,7 @@ register_deactivation_hook(__FILE__, function () {
 
 require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . "/admin/admin.config.php";
 
+
 new AdminConfig();
 
 add_action('admin_enqueue_scripts', function ($hook) {
@@ -96,3 +98,16 @@ add_filter('single_template', function ($template) {
 
     return $template;
 });
+
+if(!class_exists('Timber\Timber')){
+    require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . "/vendor/autoload.php";
+    require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . "/site/timber-extension.php";
+}
+
+if (class_exists('Timber\Timber')) {
+    // Registrar extensión de Timber si está disponible
+    add_filter('timber/twig', function ($twig) {
+        $twig->addExtension(new JuztRaffleExt_Timber());
+        return $twig;
+    });
+}

@@ -135,13 +135,13 @@
                                 </a>
                                 <button 
                                     @click="editRaffle(raffle.id)"
-                                    class="font-medium text-blue-600 hover:text-blue-900"
+                                    class="font-medium text-blue-600 hover:text-blue-900 cursor-pointer"
                                 >
                                     Editar
                                 </button>
                                 <button 
                                     @click="deleteRaffle(raffle.id, raffle.title)"
-                                    class="font-medium text-red-600 hover:text-red-900"
+                                    class="font-medium text-red-600 hover:text-red-900 cursor-pointer"
                                 >
                                     Eliminar
                                 </button>

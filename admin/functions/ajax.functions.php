@@ -254,6 +254,7 @@ function juzt_get_raffles_handler()
                 'ticket_limit' => intval(get_post_meta($post_id, '_raffle_ticket_limit', true)),
                 'tickets_sold' => intval(get_post_meta($post_id, '_raffle_tickets_sold', true)),
                 'status' => get_post_meta($post_id, '_raffle_status', true) ?: 'active',
+                'date' => get_post_meta($post_id, '_raffle_date', true) ?: null,
                 'created_at' => get_the_date('Y-m-d H:i:s'),
             ];
         }
@@ -489,6 +490,7 @@ function juzt_get_raffle_handler()
         'allow_installments' => (bool) get_post_meta($raffle_id, '_raffle_allow_installments', true),
         'ticket_limit' => intval(get_post_meta($raffle_id, '_raffle_ticket_limit', true)),
         'status' => get_post_meta($raffle_id, '_raffle_status', true) ?: 'active',
+        'date' => get_post_meta($raffle_id, '_raffle_date', true) ?: null,
         'gallery' => $gallery,
         'prizes' => $prizes,
     ];
@@ -540,6 +542,7 @@ function juzt_create_raffle_handler()
     if ($post_id) {
         // Guardar meta fields
         update_post_meta($post_id, '_raffle_price', floatval($raffle_data['price']));
+        update_post_meta($post_id, '_raffle_date', $raffle_data['date']);
         update_post_meta($post_id, '_raffle_allow_installments', !empty($raffle_data['allow_installments']));
         update_post_meta($post_id, '_raffle_ticket_limit', intval($raffle_data['ticket_limit']));
         update_post_meta($post_id, '_raffle_status', sanitize_text_field($raffle_data['status']));
@@ -636,6 +639,7 @@ function juzt_update_raffle_handler()
     update_post_meta($raffle_id, '_raffle_allow_installments', !empty($raffle_data['allow_installments']));
     update_post_meta($raffle_id, '_raffle_ticket_limit', intval($raffle_data['ticket_limit']));
     update_post_meta($raffle_id, '_raffle_status', sanitize_text_field($raffle_data['status']));
+    update_post_meta($raffle_id, '_raffle_date', $raffle_data['date']);
 
     // Actualizar galería
     if (!empty($raffle_data['gallery']) && is_array($raffle_data['gallery'])) {

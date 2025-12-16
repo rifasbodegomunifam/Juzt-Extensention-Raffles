@@ -128,6 +128,7 @@ class RaffleController {
       raffleInitialState: {
         id: null,
         title: '',
+        date: '',
         content: '',
         price: 0,
         allow_installments: false,
@@ -143,6 +144,7 @@ class RaffleController {
       raffle: {
         id: null,
         title: '',
+        date: '',
         content: '',
         price: 0,
         allow_installments: false,
@@ -191,6 +193,7 @@ class RaffleController {
         this.raffle = {
           id: null,
           title: '',
+          date: '',
           content: '',
           price: 0,
           allow_installments: false,
@@ -217,6 +220,7 @@ class RaffleController {
             // Asignar campo por campo
             this.raffle.id = data.id;
             this.raffle.title = data.title || '';
+            this.raffle.date = data.date || '';
             this.raffle.content = data.content || '';
             this.raffle.price = parseFloat(data.price) || 0;
             this.raffle.allow_installments = Boolean(data.allow_installments);
