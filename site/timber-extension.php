@@ -5,6 +5,7 @@ require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . "/site/exchange-api.php";
 use \Twig\Extension\AbstractExtension;
 use \Twig\TwigFunction;
 use \Twig\TwigFilter;
+use \Timber\Timber;
 
 if (class_exists('Twig\Extension\AbstractExtension')) {
     class JuztRaffleExt_Timber extends AbstractExtension
@@ -15,8 +16,19 @@ if (class_exists('Twig\Extension\AbstractExtension')) {
                 new TwigFunction('exchange_api_convert', [new ExchangeApi(), 'convert']),
                 new TwigFunction('format_currency', [$this, 'formatCurrency']),
                 new TwigFunction('format_date', [$this, 'formatDate']),
-                 new TwigFunction('share_url', [$this, 'getShareUrl'])
+                new TwigFunction('share_url', [$this, 'getShareUrl']),
+                new TwigFunction('get_related_post', [$this, 'getRelatedPost'])
             ];
+        }
+
+        public function getRelatedPost($post, $quantity=5){
+            $related_args = array(
+                'post_type' => $post->post_type,
+                'post__not_in' => array($post->id),
+                'post_per_page' => $quantity
+            );   
+
+            return Timber::get_posts($related_args);
         }
 
         public function formatDate($date, $format = 'd M, Y - g:i A', $locale = 'es_ES')

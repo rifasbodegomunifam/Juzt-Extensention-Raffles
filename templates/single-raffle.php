@@ -32,6 +32,7 @@ $context['post'] = Timber::get_post();
 $context['order'] = $template_content['order'] ?? [];
 $context['sections'] = $template_content['sections'] ?? [];
 
+
 // Debug (remover en producción)
 if (isset($_GET['debug'])) {
     echo '<pre>';

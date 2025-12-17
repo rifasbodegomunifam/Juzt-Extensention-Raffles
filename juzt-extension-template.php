@@ -4,7 +4,7 @@
  * Plugin Name: Juzt Extension Template
  * Plugin URI: https://juztstack.com
  * Description: Template para crear extensiones de Juzt Studio Community.
- * Version: 2.0.0
+ * Version: 2.2.0
  * Author: JuztStack
  * License: MIT
  * Requires at least: 5.8
@@ -18,12 +18,12 @@ if (!defined('ABSPATH')) {
 }
 
 // Definir constantes
-define('JUZT_EXTENSION_TEMPLATE_VERSION', '2.1.0');
+define('JUZT_EXTENSION_TEMPLATE_VERSION', '2.2.0');
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH', JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/admin');
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_SITE_PATH', JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/site');
-define('JUZT_EXTENSION_DEVELOPMENT_MODE', false); // Change to false in production
+define('JUZT_EXTENSION_DEVELOPMENT_MODE', true); // Change to false in production
 
 /**
  * Verify that Juzt Studio is active

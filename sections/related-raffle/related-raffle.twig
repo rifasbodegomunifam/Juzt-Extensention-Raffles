@@ -1,0 +1,14 @@
+{% set related_post = get_related_post(post) %}
+
+{% if related_post.found_posts > 0 %}
+	<div class="my-8">
+		<div class="px-4 mx-auto md:px-4 max-w-7xl">
+			<h2 class="mb-6 text-2xl font-bold text-white">Te puede interesar</h2>
+			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+				{% for raffle in related_post %}
+					{{ snippet('raffle-card', {raffle: raffle}) }}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+{% endif %}

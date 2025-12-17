@@ -17,7 +17,7 @@ return [
     'id' => 'juzt-extension-template', // ← Cambié de 'raffle-sections'
     'name' => 'Juzt Extension Template',
     'description' => 'Template base para crear extensiones de Juzt Studio',
-    'version' => '2.0.0',
+    'version' => '3.0.0',
     'author' => 'JuztStack',
 
     // Requerimientos
