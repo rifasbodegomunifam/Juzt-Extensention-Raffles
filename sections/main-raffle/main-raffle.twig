@@ -208,7 +208,7 @@
 	</div>
 </div>
 
-<script type="module" defer src="http://localhost:5173/src/js/raffle-detail.js"></script>
+<!--<script type="module" defer src="http://localhost:5173/src/js/raffle-detail.js"></script>-->
 
-{#{ enqueue_asset('js', 'detail-raffle', '/js/raffleDetail.js', asset_source) }#}
-{#{ enqueue_asset('css', 'detail-raffle-css', '/css/raffleDetail.css', asset_source) }#}
+{{ enqueue_asset('js', 'detail-raffle', '/js/raffleDetail.js', asset_source) }}
+{{ enqueue_asset('css', 'detail-raffle-css', '/css/raffleDetail.css', asset_source) }}
