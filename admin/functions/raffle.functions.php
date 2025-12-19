@@ -4,6 +4,9 @@ class JuztRaffleCtp
 {
     public function __construct() {
         add_action('init', array($this, 'register_post_type'));
+        
+        // ✅ Flush rewrite rules en activación del plugin
+        register_activation_hook(JUZT_EXTENSION_TEMPLATE_PLUGIN_FILE, array($this, 'flush_rewrites'));
     }
     
     public function register_post_type() {
@@ -23,10 +26,13 @@ class JuztRaffleCtp
             'labels'                => $labels,
             'public'                => true,
             'publicly_queryable'    => true,
-            'show_ui'               => false,  // No mostrar en admin WP (usamos interfaz custom)
+            'show_ui'               => false,
             'show_in_menu'          => false,
             'query_var'             => true,
-            'rewrite'               => array('slug' => 'rifas'),
+            'rewrite'               => array(
+                'slug' => 'rifas',
+                'with_front' => false, // ✅ Agregar esto
+            ),
             'capability_type'       => 'post',
             'has_archive'           => true,
             'hierarchical'          => false,
@@ -35,5 +41,11 @@ class JuztRaffleCtp
         );
         
         register_post_type('raffle', $args);
+    }
+    
+    // ✅ Método para flush
+    public function flush_rewrites() {
+        $this->register_post_type();
+        flush_rewrite_rules();
     }
 }

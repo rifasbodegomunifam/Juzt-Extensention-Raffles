@@ -4,7 +4,7 @@
  * Plugin Name: Juzt Extension Template
  * Plugin URI: https://juztstack.com
  * Description: Template para crear extensiones de Juzt Studio Community.
- * Version: 2.2.0
+ * Version: 2.3.0
  * Author: JuztStack
  * License: MIT
  * Requires at least: 5.8
@@ -18,7 +18,8 @@ if (!defined('ABSPATH')) {
 }
 
 // Definir constantes
-define('JUZT_EXTENSION_TEMPLATE_VERSION', '2.2.0');
+define('JUZT_EXTENSION_TEMPLATE_VERSION', '2.3.0');
+define('JUZT_EXTENSION_TEMPLATE_PLUGIN_FILE', __FILE__);
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH', JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/admin');
@@ -83,6 +84,19 @@ add_action('admin_enqueue_scripts', function ($hook) {
     error_log("Current page hook: {$hook}");
 });
 
+add_filter('archive_template', function ($template) {
+    if (is_post_type_archive('raffle')) {
+        $plugin_template = JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/templates/archive-raffle.php';
+
+        if (file_exists($plugin_template)) {
+            error_log("✅ Loading raffle archive template from extension");
+            return $plugin_template;
+        }
+    }
+
+    return $template;
+});
+
 // 2. Registrar template para el CPT
 add_filter('single_template', function ($template) {
     global $post;
@@ -99,7 +113,7 @@ add_filter('single_template', function ($template) {
     return $template;
 });
 
-if(!class_exists('Timber\Timber')){
+if (!class_exists('Timber\Timber')) {
     require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . "/vendor/autoload.php";
     require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . "/site/timber-extension.php";
 }
