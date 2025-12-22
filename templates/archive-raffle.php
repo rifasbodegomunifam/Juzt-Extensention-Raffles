@@ -1,5 +1,4 @@
 <?php
-// Prevenir acceso directo
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -7,55 +6,32 @@ if (!defined('ABSPATH')) {
 use Juztstack\JuztStudio\Community\Templates;
 use Timber\Timber;
 
-// Cargar template JSON de la extensión
+// Debug
+error_log('=== LOADING ARCHIVE RAFFLE ===');
+
+global $wp_query;
+error_log('Posts per page from WP: ' . $wp_query->get('posts_per_page'));
+error_log('Current page: ' . $wp_query->get('paged'));
+
+// Cargar template JSON
 $template_loader = new Templates();
 $template_content = $template_loader->get_json_template('archive-raffle');
 
 if (!$template_content) {
-    // Fallback si no se encuentra el JSON
-    echo '<div style="padding: 40px; text-align: center;">';
-    echo '<h1>⚠️ Template JSON not found</h1>';
-    echo '<p>Could not load: archive-raffle.json</p>';
-    echo '</div>';
+    echo '<h1>⚠️ Template not found</h1>';
     return;
 }
 
-// Obtener settings de la sección
-$section = null;
-foreach ($template_content["sections"] as $sect) {
-    if ($sect["section_id"] === "archive-raffle") {
-        $section = $sect;
-        break;
-    }
-}
-
-$posts_per_page = $section['settings']['number_posts'] ?? 12;
-
-// Query de raffles con paginación
-$paged = get_query_var('paged') ? get_query_var('paged') : 1;
-
-$args = [
-    'post_type' => 'raffle',
-    'posts_per_page' => $posts_per_page,
-    'paged' => $paged,
-];
-
-// Setup contexto de Timber
+// Setup contexto
 $context = Timber::context();
 
-// ✅ USAR Timber::get_posts() en lugar de new PostQuery()
-$context['posts'] = Timber::get_posts($args);
+// ✅ Usar el query GLOBAL (ya tiene posts_per_page correcto)
+$context['posts'] = Timber::get_posts();
 
 $context['order'] = $template_content['order'] ?? [];
 $context['sections'] = $template_content['sections'] ?? [];
 
-// Debug (remover en producción)
-if (isset($_GET['debug'])) {
-    echo '<pre>';
-    echo 'Template Content: ';
-    print_r($template_content);
-    echo '</pre>';
-}
+error_log('Posts found: ' . count($context['posts']));
 
-// Renderizar usando el layout del TEMA
+// Renderizar
 Timber::render('templates/index.twig', $context);

@@ -31,7 +31,9 @@ class JuztRaffleCtp
             'query_var'             => true,
             'rewrite'               => array(
                 'slug' => 'rifas',
-                'with_front' => false, // ✅ Agregar esto
+                'with_front' => false,
+                'pages' => true, // ✅ Importante para paginación
+                'feeds' => true, // ✅ Agregar esto
             ),
             'capability_type'       => 'post',
             'has_archive'           => true,

@@ -24,7 +24,7 @@ define('JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH', JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/admin');
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_SITE_PATH', JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/site');
-define('JUZT_EXTENSION_DEVELOPMENT_MODE', false); // Change to false in production
+define('JUZT_EXTENSION_DEVELOPMENT_MODE', true); // Change to false in production
 
 /**
  * Verify that Juzt Studio is active
@@ -60,7 +60,15 @@ register_activation_hook(__FILE__, function () {
         }
     }
 
-    flush_rewrite_rules();
+    // Borrar opciones viejas
+    delete_option('rewrite_rules');
+
+    // Flush hard
+    global $wp_rewrite;
+    $wp_rewrite->init();
+    flush_rewrite_rules(true);
+
+    error_log("✅ Plugin activated and rules flushed");
 });
 
 /**
@@ -68,7 +76,8 @@ register_activation_hook(__FILE__, function () {
  */
 register_deactivation_hook(__FILE__, function () {
     error_log('🔌 Plugin deactivated: ' . plugin_basename(__FILE__));
-    flush_rewrite_rules();
+    delete_option('rewrite_rules');
+    flush_rewrite_rules(true);
 });
 
 /***
@@ -84,18 +93,62 @@ add_action('admin_enqueue_scripts', function ($hook) {
     error_log("Current page hook: {$hook}");
 });
 
-add_filter('archive_template', function ($template) {
+// ✅ FORZAR TEMPLATE con template_include
+add_filter('template_include', function ($template) {
     if (is_post_type_archive('raffle')) {
         $plugin_template = JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/templates/archive-raffle.php';
 
         if (file_exists($plugin_template)) {
-            error_log("✅ Loading raffle archive template from extension");
+            error_log("✅ FORCING raffle archive template: $plugin_template");
+
+            global $wp_query;
+            $wp_query->is_404 = false;
+            $wp_query->is_archive = true;
+            $wp_query->is_post_type_archive = true;
+            status_header(200);
+
             return $plugin_template;
         }
     }
 
     return $template;
-});
+}, 999);
+
+add_action('pre_get_posts', function($query) {
+    // Solo en frontend y main query
+    if (is_admin() || !$query->is_main_query()) {
+        return;
+    }
+    
+    // Detectar si es URL de raffle archive
+    if ($query->get('post_type') === 'raffle' && is_post_type_archive('raffle')) {
+        error_log("🔍 Fixing raffle query");
+        
+        // Forzar que sea archive, no 404
+        $query->is_archive = true;
+        $query->is_post_type_archive = true;
+        $query->is_404 = false;
+        
+        // ✅✅✅ LEER posts_per_page del template JSON
+        $template_loader = new \Juztstack\JuztStudio\Community\Templates();
+        $template_content = $template_loader->get_json_template('archive-raffle');
+        
+        if ($template_content && isset($template_content['sections'])) {
+            foreach ($template_content['sections'] as $section) {
+                if ($section['section_id'] === 'archive-raffle' && isset($section['settings']['number_posts'])) {
+                    $posts_per_page = intval($section['settings']['number_posts']);
+                    $query->set('posts_per_page', $posts_per_page);
+                    
+                    error_log("✅ Set posts_per_page to: $posts_per_page");
+                    break;
+                }
+            }
+        }
+        
+        error_log("✅ Query fixed");
+    }
+}, 1);
+
 
 // 2. Registrar template para el CPT
 add_filter('single_template', function ($template) {
@@ -125,3 +178,92 @@ if (class_exists('Timber\Timber')) {
         return $twig;
     });
 }
+
+add_action('init', function () {
+    if (isset($_GET['check_rules'])) {
+        global $wp_rewrite;
+
+        // ✅ Forzar generación de rules si no existen
+        if ($wp_rewrite->rules === null) {
+            $wp_rewrite->flush_rules(false);
+        }
+
+        echo '<h2>Rewrite Rules para Raffle:</h2><pre>';
+
+        if (is_array($wp_rewrite->rules)) {
+            $found = false;
+            foreach ($wp_rewrite->rules as $pattern => $rewrite) {
+                if (strpos($pattern, 'rifas') !== false || strpos($rewrite, 'raffle') !== false) {
+                    echo "✅ $pattern => $rewrite\n";
+                    $found = true;
+                }
+            }
+
+            if (!$found) {
+                echo "❌ No se encontraron reglas para 'rifas'\n";
+            }
+        } else {
+            echo "❌ Rules array is empty or null\n";
+        }
+
+        echo '</pre>';
+
+        echo '<h2>Post Type Raffle:</h2><pre>';
+        $pt = get_post_type_object('raffle');
+        if ($pt) {
+            print_r($pt->rewrite);
+            echo "\nHas archive: " . ($pt->has_archive ? 'YES' : 'NO') . "\n";
+            echo "Publicly queryable: " . ($pt->publicly_queryable ? 'YES' : 'NO') . "\n";
+        } else {
+            echo "❌ Post type 'raffle' not found\n";
+        }
+        echo '</pre>';
+
+        wp_die();
+    }
+}, 999);
+
+add_action('init', function () {
+    if (isset($_GET['hard_flush'])) {
+
+        // Borrar opciones de rewrite
+        delete_option('rewrite_rules');
+
+        // Re-registrar post type
+        $cpt = new JuztRaffleCtp();
+        $cpt->register_post_type();
+
+        // Flush rules
+        global $wp_rewrite;
+        $wp_rewrite->init();
+        $wp_rewrite->flush_rules(true);
+
+        echo '<h1>✅ Hard Flush Complete!</h1>';
+        echo '<p><a href="/?check_rules=1">Check Rules</a></p>';
+        echo '<p><a href="/rifas/">Test /rifas/</a></p>';
+        echo '<p><a href="/rifas/page/2/">Test /rifas/page/2/</a></p>';
+
+        wp_die();
+    }
+}, 999);
+
+add_action('init', function() {
+    add_rewrite_rule(
+        '^rifas/page/?([0-9]{1,})/?$',
+        'index.php?post_type=raffle&paged=$matches[1]',
+        'top'
+    );
+    
+    add_rewrite_rule(
+        '^rifas/?$',
+        'index.php?post_type=raffle',
+        'top'
+    );
+    
+    // Flush solo si es necesario
+    $rules = get_option('rewrite_rules');
+    if (!isset($rules['rifas/page/?([0-9]{1,})/?$'])) {
+        flush_rewrite_rules(false);
+        error_log("✅ Manual rewrite rules added");
+    }
+}, 10);
