@@ -43,6 +43,8 @@
 				<div
 					class="bg-[#1a1a1a] rounded-xl">
 
+					{% if raffle_gallery | length > 1  %}
+
 					<raffle-gallery class="block" config='{"perPage": 1, "pagination": true, "perMove": 1, "type": "loop", "rewind": true, "arrows": false}'>
 						{% for image in raffle_gallery %}
 						<li class="w-full h-full border border-gray-800 rounded-xl splide__slide">
@@ -52,6 +54,12 @@
 						</li>
 						{% endfor %}
 					</raffle-gallery>
+
+					{% else %}
+					<figure class="mb-0! w-full h-full overflow-hidden rounded-xl border border-gray-800">
+						<img loading="lazy" class="object-cover w-full h-full rounded-xl" src="{{ raffle_gallery[0] | attachment_url }}" alt="Raffle Image" />
+					</figure>
+					{% endif %}
 				</div>
 
 				<!-- Imagen del Producto -->
