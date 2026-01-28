@@ -227,7 +227,8 @@ class Juzt_Raffle_Database
             return array(
                 'success' => true,
                 'order_id' => $order_id,
-                'order_number' => $order_number
+                'order_number' => $order_number,
+                'total_ammount' => $total_amount
             );
         }
 
@@ -251,6 +252,23 @@ class Juzt_Raffle_Database
             $order['numbers'] = $this->get_order_numbers($order_id);
             $order['payments'] = $this->get_order_payments($order_id); // ✅ Agregar pagos
             $order['history'] = $this->get_order_history($order_id); // ✅ Agregar historial
+        }
+
+        return $order;
+    }
+
+    public function get_order_by_number($number)
+    {
+        global $wpdb;
+        $table = self::get_orders_table();
+
+        $order = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$table} WHERE order_number = %s",
+            $number
+        ), ARRAY_A);
+
+        if ($order) {
+            $order['numbers'] = $this->get_order_numbers($order['id']);
         }
 
         return $order;
@@ -711,7 +729,7 @@ class Juzt_Raffle_Database
         $max_attempts = $quantity * 10;
         $attempts = 0;
 
-        $padding = strlen((string)($ticket_limit - 1));
+        $padding = strlen((string) ($ticket_limit - 1));
 
         while (count($numbers) < $quantity && $attempts < $max_attempts) {
             $random_number = rand(0, $ticket_limit - 1);
@@ -793,5 +811,38 @@ class Juzt_Raffle_Database
             'rejected' => $wpdb->get_var("SELECT COUNT(*) FROM {$table} {$where} AND status = 'rejected'"),
             'total_revenue' => $wpdb->get_var("SELECT SUM(total_amount) FROM {$table} {$where} AND status IN ('approved', 'completed')"),
         );
+    }
+
+    public function get_raffle($raffle_id)
+    {
+        $post = get_post($raffle_id);
+
+        if (!$post || $post->post_type !== 'raffle') {
+            return null;
+        }
+
+        // Obtener premios
+        $prizes = get_post_meta($raffle_id, '_raffle_prizes', true);
+        if (empty($prizes) || !is_array($prizes)) {
+            // Al menos un premio vacío por defecto
+            $prizes = [
+                ['title' => '', 'description' => '', 'image' => '', 'detail' => '']
+            ];
+        }
+
+        $raffle = [
+            'id' => $raffle_id,
+            'title' => $post->post_title,
+            'slug' => get_post_field('post_name', $raffle_id),
+            'content' => $post->post_content,
+            'price' => floatval(get_post_meta($raffle_id, '_raffle_price', true)),
+            'allow_installments' => (bool) get_post_meta($raffle_id, '_raffle_allow_installments', true),
+            'ticket_limit' => intval(get_post_meta($raffle_id, '_raffle_ticket_limit', true)),
+            'status' => get_post_meta($raffle_id, '_raffle_status', true) ?: 'active',
+            'date' => get_post_meta($raffle_id, '_raffle_date', true) ?: null,
+            'prizes' => $prizes,
+        ];
+
+        return $raffle;
     }
 }

@@ -1,12 +1,18 @@
 import { LitElement, html } from 'lit';
+import HandleRequest from '../request';
 
 class RaffleForm extends LitElement {
 
     static properties = {
         raffle: { type: Number },
+        price: { type: Number },
+        rateexchange: { type: String },
         quantity: { type: Number },
         totalPrice: { type: Number },
-        selectedFile: { type: Object }
+        selectedFile: { type: Object },
+        cta_text: { type: String },
+        loading: { type: Boolean },
+        proccesing: { type: Boolean }
     };
 
     // ESTO DESACTIVA EL SHADOW DOM
@@ -17,10 +23,51 @@ class RaffleForm extends LitElement {
     constructor() {
         super();
         this.raffle = null;
+        this.rateexchange = '{}';
+        this.rates = {};
+        this.price = 0;
         this.quantity = 1;
-        this.ticketPrice = 25;
-        this.totalPrice = 25;
+        this.ticketPrice = 0;
+        this.totalPrice = 0;
+        this.totalRate = {cop: 0, ves: 0};
         this.selectedFile = null;
+        this.loading = true;
+        this.showForm = true;
+        this.proccesing = false;
+        this.cta_text = "Confirmar Compra";
+
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        window.addEventListener('raffle-countdown:ready', (event) => {
+            this.showForm = !event.detail.status;
+            this.loading = false;
+            console.log("Aqui");
+        });
+
+        console.log('Rates disponibles:', this.rates, this.rateexchange);
+    }
+
+    // ✅ Agregar este lifecycle method
+    willUpdate(changedProperties) {
+        // Cuando price cambie, actualizar ticketPrice y total
+        if (changedProperties.has('price') && this.price > 0) {
+            this.ticketPrice = this.price;
+            this.updateTotal();
+        }
+
+        // ✅ Parsear el JSON string
+        if (changedProperties.has('rateexchange')) {
+            try {
+                this.rates = JSON.parse(this.rateexchange);
+                console.log('Rates parseadas:', this.rates, this.rateexchange);
+                this.updateTotal();
+            } catch (e) {
+                console.error('Error parseando rates:', e);
+                this.rates = { cop: 1, ves: 1 };
+            }
+        }
     }
 
     incrementQuantity() {
@@ -44,6 +91,10 @@ class RaffleForm extends LitElement {
 
     updateTotal() {
         this.totalPrice = this.quantity * this.ticketPrice;
+        this.totalRate = {
+            cop: this.totalPrice * this.rates.cop,
+            ves: this.totalPrice * this.rates.ves
+        };
     }
 
     handleFileSelect(event) {
@@ -69,33 +120,59 @@ class RaffleForm extends LitElement {
         if (input) input.value = '';
     }
 
-    handleSubmit(event) {
+    async handleSubmit(event) {
         event.preventDefault();
-        
+        this.proccesing = true;
+        this.cta_text = "Procesando";
         const formData = new FormData(event.target);
+
         const data = {
-            nombre: formData.get('nombre'),
-            apellido: formData.get('apellido'),
-            correo: formData.get('correo'),
-            telefono: formData.get('telefono'),
-            direccion: formData.get('direccion'),
-            cantidad: this.quantity,
-            total: this.totalPrice,
+            raffle_id: this.raffle,
+            customer_name: formData.get('customer_name'),
+            customer_email: formData.get('customer_email'),
+            customer_phone: formData.get('customer_phone'),
+            customer_address: formData.get('customer_address'),
+            ticket_quantity: this.quantity,
+            total_amount: this.totalPrice,
             comprobante: this.selectedFile?.file
         };
 
-        console.log('Datos del formulario:', data);
-        
-        this.dispatchEvent(new CustomEvent('form-submit', {
-            detail: data,
-            bubbles: true,
-            composed: true
-        }));
+        try {
+            console.log('Datos del formulario:', data);
+            const order_create = await HandleRequest.saveOrder(data);
 
-        alert('¡Compra confirmada! Te enviaremos un correo de confirmación.');
+            console.log('orden', order_create);
+
+            this.proccesing = false;
+            this.cta_text = "Orden creada, redirigiendo en 5 segundos";
+
+            setTimeout(() => {
+                window.location.href = `/orden-completada?orden=${order_create.order}`;
+            }, 5000);
+
+        } catch (error) {
+            this.cta_text = "Ha ocurrido un error al procesar la orden.";
+        }
+
     }
 
     render() {
+        if (this.loading) {
+            return html`
+            <main class="w-full rounded-lg">
+                <h3 class="text-3xl text-center font-bold text-white mb-6">Cargando</h3>
+            </main>
+            `;
+        }
+
+        if (!this.showForm) {
+            return html`
+            <main class="w-full rounded-lg">
+                <h3 class="text-3xl text-center font-bold text-white mb-6">Sorteo finalizado</h3>
+            </main> 
+            `;
+        }
+
         return html`
         <main class="w-full rounded-lg">
             <h3 class="text-3xl text-center font-bold text-white mb-6">Ingresa tu información</h3>
@@ -111,31 +188,17 @@ class RaffleForm extends LitElement {
                         Datos Personales
                     </h2>
 
-                    <div class="grid sm:grid-cols-2 gap-4">
+                    <div class="grid sm:grid-cols-1 gap-4">
                         <div>
                             <label for="nombre" class="block text-sm font-medium text-gray-300 mb-2">
-                                Nombre <span class="text-red-600">*</span>
+                                Nombre y Apellido <span class="text-red-600">*</span>
                             </label>
                             <input
                                 type="text"
-                                id="nombre"
-                                name="nombre"
+                                id="customer_name"
+                                name="customer_name"
                                 required
                                 placeholder="Juan"
-                                class="w-full bg-[#0f0f0f] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
-                            />
-                        </div>
-
-                        <div>
-                            <label for="apellido" class="block text-sm font-medium text-gray-300 mb-2">
-                                Apellido <span class="text-red-600">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                id="apellido"
-                                name="apellido"
-                                required
-                                placeholder="Pérez"
                                 class="w-full bg-[#0f0f0f] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
                             />
                         </div>
@@ -158,8 +221,8 @@ class RaffleForm extends LitElement {
                             </label>
                             <input
                                 type="email"
-                                id="correo"
-                                name="correo"
+                                id="customer_email"
+                                name="customer_email"
                                 required
                                 placeholder="juan.perez@ejemplo.com"
                                 class="w-full bg-[#0f0f0f] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
@@ -172,8 +235,8 @@ class RaffleForm extends LitElement {
                             </label>
                             <input
                                 type="tel"
-                                id="telefono"
-                                name="telefono"
+                                id="customer_phone"
+                                name="customer_phone"
                                 required
                                 placeholder="+57 300 123 4567"
                                 class="w-full bg-[#0f0f0f] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
@@ -185,8 +248,8 @@ class RaffleForm extends LitElement {
                                 Dirección <span class="text-red-600">*</span>
                             </label>
                             <textarea
-                                id="direccion"
-                                name="direccion"
+                                id="customer_address"
+                                name="customer_address"
                                 required
                                 rows="3"
                                 placeholder="Calle 123 #45-67, Apartamento 8B, Bogotá"
@@ -207,8 +270,8 @@ class RaffleForm extends LitElement {
 
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-300 mb-3">Selección rápida:</label>
-                        <div class="grid grid-cols-4 gap-2">
-                            ${[1, 3, 5, 10].map(qty => html`
+                        <div class="grid grid-cols-5 gap-2">
+                            ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(qty => html`
                                 <button
                                     type="button"
                                     @click=${() => this.setQuantity(qty)}
@@ -226,7 +289,7 @@ class RaffleForm extends LitElement {
                             <button
                                 type="button"
                                 @click=${this.decrementQuantity}
-                                class="w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xl transition-colors flex items-center justify-center"
+                                class="w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xl transition-colors flex items-center justify-center cursor-pointer"
                             >
                                 -
                             </button>
@@ -234,8 +297,8 @@ class RaffleForm extends LitElement {
                             <div class="flex-1 relative">
                                 <input
                                     type="text"
-                                    id="cantidad"
-                                    name="cantidad"
+                                    id="ticket_quantity"
+                                    name="ticket_quantity"
                                     min="1"
                                     max="50"
                                     .value=${this.quantity}
@@ -248,7 +311,7 @@ class RaffleForm extends LitElement {
                             <button
                                 type="button"
                                 @click=${this.incrementQuantity}
-                                class="w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xl transition-colors flex items-center justify-center"
+                                class="w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xl transition-colors flex items-center justify-center cursor-pointer"
                             >
                                 +
                             </button>
@@ -257,7 +320,24 @@ class RaffleForm extends LitElement {
                         <div class="mt-4 p-4 bg-red-600/10 border border-red-600/30 rounded-lg">
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-300 font-medium">Total a pagar:</span>
-                                <span class="text-3xl font-bold text-red-600">$${this.totalPrice}</span>
+                                <span class="text-md font-bold text-red-500">${new Intl.NumberFormat('en-US', {
+                                    style: 'currency',
+                                    currency: 'USD',
+                                    minimumFractionDigits: 2, 
+                                    maximumFractionDigits: 2
+                                }).format(this.totalPrice)}</span>
+                                <span class="text-md font-bold text-red-500">${new Intl.NumberFormat('es-CO', {
+                                    style: 'currency',
+                                    currency: 'COP',
+                                    minimumFractionDigits: 2, 
+                                    maximumFractionDigits: 2
+                                }).format(this.totalRate.cop)}</span>
+                                <span class="text-md font-bold text-red-500">${new Intl.NumberFormat('es-VE', {
+                                    style: 'currency',
+                                    currency: 'VES',
+                                    minimumFractionDigits: 2, 
+                                    maximumFractionDigits: 2
+                                }).format(this.totalRate.ves)}</span>
                             </div>
                         </div>
                     </div>
@@ -364,10 +444,11 @@ class RaffleForm extends LitElement {
                 </div>
 
                 <button
+                    ${this.proccesing ? 'disabled' : ''}
                     type="submit"
-                    class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-red-600/50 text-lg"
+                    class="w-full cursor-pointer bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-red-600/50 text-lg"
                 >
-                    Confirmar Compra
+                    ${this.cta_text}
                 </button>
 
             </form>

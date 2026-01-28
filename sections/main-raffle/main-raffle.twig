@@ -49,7 +49,9 @@
 						{% for image in raffle_gallery %}
 						<li class="w-full h-full border border-gray-800 rounded-xl splide__slide">
 							<figure class="mb-0! w-full h-full overflow-hidden rounded-xl">
-								<img loading="lazy" class="object-cover w-full h-full rounded-xl" src="{{ image | attachment_url }}" alt="Slide Raffle" />
+								<img sizes="(max-width: 640px) 100vw, 
+           (max-width: 1024px) 50vw, 
+           33vw" class="object-cover w-full h-48" loading="lazy" class="object-cover w-full h-full rounded-xl" srcset="{{ image | attachment_srcset }}" alt="Slide Raffle" />
 							</figure>
 						</li>
 						{% endfor %}
@@ -57,7 +59,7 @@
 
 					{% else %}
 					<figure class="mb-0! w-full h-full overflow-hidden rounded-xl border border-gray-800">
-						<img loading="lazy" class="object-cover w-full h-full rounded-xl" src="{{ raffle_gallery[0] | attachment_url }}" alt="Raffle Image" />
+						<img loading="lazy" class="object-cover w-full h-full rounded-xl" srcset="{{ raffle_gallery[0] | attachment_srcset }}" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" alt="Raffle Image" />
 					</figure>
 					{% endif %}
 				</div>
@@ -177,7 +179,7 @@
 							<h3 class="mb-3 font-semibold text-white"> Completa tu suerte!</h3>
 
 						<div>
-							{{ snippet('raffle-form', {raffle: post.id}) }}
+							{{ snippet('raffle-form', {raffle: post.id, price: raffle_price, cop: raffle_price_cop, ves: raffle_price_ves}) }}
 						</div>
 
 						<!-- Trust -->
@@ -216,7 +218,10 @@
 	</div>
 </div>
 
-<!--<script type="module" defer src="http://localhost:5173/src/js/raffle-detail.js"></script>-->
+{{ enqueue_asset('js', 'detail-raffle', '/js/raffleDetail.js?version=' ~ time_seconds(), asset_source) }}
+{{ enqueue_asset('css', 'detail-raffle-css', '/css/raffleDetail.css?version=' ~ time_seconds(), asset_source) }}
 
-{{ enqueue_asset('js', 'detail-raffle', '/js/raffleDetail.js', asset_source) }}
-{{ enqueue_asset('css', 'detail-raffle-css', '/css/raffleDetail.css', asset_source) }}
+{{ localize_script('JuztExtensionRaffle', {
+    nonce: wp_nonce('wp_rest'),
+    apiUrl: '/wp-json/juzt-raffle-extension/frontend/v1'
+}) }}

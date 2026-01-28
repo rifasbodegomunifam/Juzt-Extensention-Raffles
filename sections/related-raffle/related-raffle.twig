@@ -1,4 +1,12 @@
-{% set related_post = get_related_post(post) %}
+{% set related_post = get_related_post(post, 5, {
+    'meta_query': [
+        {
+            'key': '_raffle_status',
+            'value': 'active',
+            'compare': '='
+        }
+    ]
+}) %}
 
 {% if related_post.found_posts > 0 %}
 	<div class="my-8">

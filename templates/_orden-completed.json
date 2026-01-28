@@ -1,0 +1,16 @@
+{
+    "name": "orden-completed",
+    "description": "Template for orders",
+    "template": true,
+    "order": [
+        "section_1769082894459"
+    ],
+    "sections": {
+        "section_1769082894459": {
+            "section_id": "orden-completed",
+            "settings": [],
+            "blocks": []
+        }
+    },
+    "post_type": "page"
+}

@@ -69,5 +69,13 @@ window.addEventListener("alpine:init", () => {
     console.log("✅ Alpine configurado correctamente");
 });
 
+// ✅ Cuando Alpine esté completamente inicializado
+document.addEventListener('alpine:initialized', () => {
+    console.log('✅ Alpine initialized');
+    
+    // ✅ Marcar router como listo DESPUÉS de Alpine
+    RaffleApp.router.ready();
+});
+
 window.Alpine = Alpine;
 Alpine.start();

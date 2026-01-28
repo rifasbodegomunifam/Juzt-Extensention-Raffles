@@ -3,11 +3,18 @@ class Router {
         this.routes = {};
         this.currentRoute = null;
         this.params = {};
+        this.isReady = false; // ✅ Flag para indicar que está listo
+        this.pendingRoute = null; // ✅ Guardar ruta pendiente
         
         // Escuchar cambios en el hash
         window.addEventListener('hashchange', () => this.handleRouteChange());
+    }
+
+    ready() {
+        this.isReady = true;
+        console.log('✅ Router ready, processing initial route');
         
-        // Cargar ruta inicial
+        // Procesar la ruta inicial o pendiente
         this.handleRouteChange();
     }
     
@@ -19,6 +26,7 @@ class Router {
      */
     register(path, view, handler = null) {
         this.routes[path] = { view, handler };
+        console.log(`📝 Ruta registrada: ${path} → ${view}`);
     }
     
     /**
@@ -67,6 +75,13 @@ class Router {
      * Manejar cambio de ruta
      */
     handleRouteChange() {
+        // ✅ Si no está listo, guardar para procesar después
+        if (!this.isReady) {
+            console.log('⏳ Router not ready yet, pending route...');
+            this.pendingRoute = this.getCurrentPath();
+            return;
+        }
+        
         const currentPath = this.getCurrentPath();
         const matched = this.matchRoute(currentPath);
         

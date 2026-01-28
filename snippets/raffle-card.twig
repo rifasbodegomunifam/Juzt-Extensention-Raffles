@@ -4,7 +4,9 @@
 
 <div class="bg-[#1a1a1a] rounded-xl overflow-hidden border border-gray-800 hover:border-red-600 transition-colors flex flex-col">
 	<div class="relative">
-		<img src="{{ thumbnail_id | attachment_url }}" class="object-cover w-full h-48"/>
+		<img alt="{{ raffle.title }}" srcset="{{ thumbnail_id | attachment_srcset }}" sizes="(max-width: 640px) 100vw, 
+           (max-width: 1024px) 50vw, 
+           33vw" class="object-cover w-full h-48"/>
 	</div>
 	
 	<!-- ✅ Agregar flex flex-col flex-1 -->
@@ -23,14 +25,11 @@
 					<div class="text-sm font-semibold text-white">{{ raffle_date|date_format('d M, Y - g:i A') }}</div>
 				</div>
 			</div>
-			
-			<div class="bg-gray-800 rounded-full h-1.5 mb-2">
-				<div class="bg-red-600 h-1.5 rounded-full" style="width: 42%"></div>
-			</div>
 		</div>
 		
 		<!-- ✅ Botón con mt-auto para pegarlo abajo -->
 		<a
+			aria-label="Ver detalles de {{ raffle.title }}"
 			href="{{ raffle.link }}"
 			class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg cursor-pointer flex justify-center mt-auto">
 			Ver Detalles

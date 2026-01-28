@@ -1,5 +1,7 @@
 <?php
 
+@require_once(JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH . "/functions/email.functions.php");
+
 /**
  * AJAX Handlers para Juzt Raffle
  */
@@ -154,11 +156,24 @@ function juzt_approve_order_handler()
     $user_id = get_current_user_id();
     $db->update_order_status($order_id, 'completed', $user_id);
 
-    // TODO: Enviar email al cliente con los números asignados
+    $raffle_data = $db->get_raffle($order['raffle_id']);
+
+    $email = EmailHandler::generate_email('order-client-completed', [
+        "order" => $order,
+        "raffle" => $raffle_data,
+        "numeros" => $result['numbers']
+    ]);
+
+    $send = EmailHandler::send(
+        $order["customer_email"],
+        "Numeros participantes de la rifa {$raffle_data['title']} orden #{$order['order_number']}",
+        $email
+    );
 
     wp_send_json_success([
         'message' => 'Orden aprobada y números asignados exitosamente',
-        'numbers' => $result['numbers']
+        'numbers' => $result['numbers'],
+        'email' => $send
     ]);
 }
 
@@ -349,6 +364,8 @@ function juzt_verify_payment_handler()
         wp_send_json_success([
             'message' => "Pago de cuota #{$installment_number} verificado exitosamente"
         ]);
+
+        
     } else {
         wp_send_json_error(['message' => 'Error al verificar el pago']);
     }
@@ -481,6 +498,17 @@ function juzt_get_raffle_handler()
         ];
     }
 
+    $prizes = array_map(function ($prize) {
+        // Mantener el ID original
+        // Agregar la URL en una clave separada
+        if (!empty($prize['image'])) {
+            $prize['imageUrl'] = wp_get_attachment_url($prize['image']);
+        } else {
+            $prize['imageUrl'] = '';
+        }
+        return $prize;
+    }, $prizes);
+
     $raffle = [
         'id' => $raffle_id,
         'title' => $post->post_title,
@@ -527,11 +555,11 @@ function juzt_create_raffle_handler()
 
     // Crear el post
     $post_id = wp_insert_post([
-        'post_title'   => sanitize_text_field($raffle_data['title']),
+        'post_title' => sanitize_text_field($raffle_data['title']),
         'post_content' => wp_kses_post($raffle_data['content']),
-        'post_status'  => 'publish',
-        'post_type'    => 'raffle',
-        'post_author'  => get_current_user_id(),
+        'post_status' => 'publish',
+        'post_type' => 'raffle',
+        'post_author' => get_current_user_id(),
     ]);
 
     if (is_wp_error($post_id)) {
@@ -553,12 +581,12 @@ function juzt_create_raffle_handler()
             // Convertir URLs a attachment IDs si es posible
             $gallery_ids = [];
             foreach ($raffle_data['gallery'] as $image_url) {
-                $attachment_id = attachment_url_to_postid($image_url);
+                $attachment_id = attachment_url_to_postid($image_url['url']);
                 if ($attachment_id) {
                     $gallery_ids[] = $attachment_id;
                 } else {
                     // Si no se encuentra el ID, guardar la URL
-                    $gallery_ids[] = $image_url;
+                    $gallery_ids[] = $image_url['url'];
                 }
             }
             update_post_meta($post_id, '_raffle_gallery', $gallery_ids);
@@ -624,8 +652,8 @@ function juzt_update_raffle_handler()
 
     // Actualizar el post
     $updated = wp_update_post([
-        'ID'           => $raffle_id,
-        'post_title'   => sanitize_text_field($raffle_data['title']),
+        'ID' => $raffle_id,
+        'post_title' => sanitize_text_field($raffle_data['title']),
         'post_content' => wp_kses_post($raffle_data['content']),
     ]);
 
@@ -644,16 +672,16 @@ function juzt_update_raffle_handler()
     // Actualizar galería
     if (!empty($raffle_data['gallery']) && is_array($raffle_data['gallery'])) {
         $gallery_ids = [];
+        
         foreach ($raffle_data['gallery'] as $image_url) {
-            $attachment_id = attachment_url_to_postid($image_url);
+            $attachment_id = attachment_url_to_postid($image_url['url']);
             if ($attachment_id) {
                 $gallery_ids[] = $attachment_id;
             } else {
-                $gallery_ids[] = $image_url;
+                $gallery_ids[] = $image_url['url'];
             }
         }
         update_post_meta($raffle_id, '_raffle_gallery', $gallery_ids);
-
         // Actualizar featured image
         if (!empty($gallery_ids) && is_numeric($gallery_ids[0])) {
             set_post_thumbnail($raffle_id, $gallery_ids[0]);
@@ -670,7 +698,7 @@ function juzt_update_raffle_handler()
             $prizes[] = [
                 'title' => sanitize_text_field($prize['title'] ?? ''),
                 'description' => sanitize_textarea_field($prize['description'] ?? ''),
-                'image' => esc_url_raw($prize['image'] ?? ''),
+                'image' => $prize['image'] ?? null,
                 'detail' => sanitize_text_field($prize['detail'] ?? ''),
             ];
         }
@@ -998,6 +1026,24 @@ function juzt_add_order_comment_handler()
  * Subir comprobante manualmente desde el admin
  */
 add_action('wp_ajax_juzt_upload_payment_proof_admin', 'juzt_upload_payment_proof_admin_handler');
+
+add_action('wp_ajax_get_attachment_url', function () {
+    check_ajax_referer('juzt_raffle_nonce', 'nonce');
+
+    $attachment_id = intval($_GET['attachment_id']);
+
+    if (!$attachment_id) {
+        wp_send_json_error(['message' => 'ID inválido']);
+    }
+
+    $url = wp_get_attachment_url($attachment_id);
+
+    if ($url) {
+        wp_send_json_success(['url' => $url]);
+    } else {
+        wp_send_json_error(['message' => 'Imagen no encontrada']);
+    }
+});
 
 function juzt_upload_payment_proof_admin_handler()
 {

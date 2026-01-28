@@ -4,7 +4,7 @@
  * Plugin Name: Juzt Extension Template
  * Plugin URI: https://juztstack.com
  * Description: Template para crear extensiones de Juzt Studio Community.
- * Version: 2.3.0
+ * Version: 2.3.1
  * Author: JuztStack
  * License: MIT
  * Requires at least: 5.8
@@ -17,14 +17,23 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+$plugin_data = get_plugin_data(__FILE__);
+
 // Definir constantes
-define('JUZT_EXTENSION_TEMPLATE_VERSION', '2.3.0');
+define('JUZT_EXTENSION_TEMPLATE_VERSION', $plugin_data['Version']);
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_FILE', __FILE__);
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH', JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/admin');
 define('JUZT_EXTENSION_TEMPLATE_PLUGIN_SITE_PATH', JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/site');
-define('JUZT_EXTENSION_DEVELOPMENT_MODE', true); // Change to false in production
+define('JUZT_EXTENSION_DEVELOPMENT_MODE', false); // Change to false in production
+
+
+/***
+ * Load request for frontend.
+ */
+
+require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_SITE_PATH . '/frontend-api.php';
 
 /**
  * Verify that Juzt Studio is active
@@ -114,37 +123,46 @@ add_filter('template_include', function ($template) {
     return $template;
 }, 999);
 
-add_action('pre_get_posts', function($query) {
+add_action('pre_get_posts', function ($query) {
     // Solo en frontend y main query
     if (is_admin() || !$query->is_main_query()) {
         return;
     }
-    
+
     // Detectar si es URL de raffle archive
     if ($query->get('post_type') === 'raffle' && is_post_type_archive('raffle')) {
         error_log("🔍 Fixing raffle query");
-        
+
         // Forzar que sea archive, no 404
         $query->is_archive = true;
         $query->is_post_type_archive = true;
         $query->is_404 = false;
-        
+
+        // ✅ FILTRAR POR STATUS ACTIVE
+        $query->set('meta_query', [
+            [
+                'key'     => '_raffle_status',
+                'value'   => 'active',
+                'compare' => '='
+            ]
+        ]);
+
         // ✅✅✅ LEER posts_per_page del template JSON
         $template_loader = new \Juztstack\JuztStudio\Community\Templates();
         $template_content = $template_loader->get_json_template('archive-raffle');
-        
+
         if ($template_content && isset($template_content['sections'])) {
             foreach ($template_content['sections'] as $section) {
                 if ($section['section_id'] === 'archive-raffle' && isset($section['settings']['number_posts'])) {
                     $posts_per_page = intval($section['settings']['number_posts']);
                     $query->set('posts_per_page', $posts_per_page);
-                    
+
                     error_log("✅ Set posts_per_page to: $posts_per_page");
                     break;
                 }
             }
         }
-        
+
         error_log("✅ Query fixed");
     }
 }, 1);
@@ -247,23 +265,46 @@ add_action('init', function () {
     }
 }, 999);
 
-add_action('init', function() {
+add_action('init', function () {
     add_rewrite_rule(
         '^rifas/page/?([0-9]{1,})/?$',
         'index.php?post_type=raffle&paged=$matches[1]',
         'top'
     );
-    
+
     add_rewrite_rule(
         '^rifas/?$',
         'index.php?post_type=raffle',
         'top'
     );
-    
+
+    add_rewrite_rule(
+        '^orden-completada/?$',
+        'index.php?orden_completada=1',
+        'top'
+    );
+
     // Flush solo si es necesario
     $rules = get_option('rewrite_rules');
     if (!isset($rules['rifas/page/?([0-9]{1,})/?$'])) {
         flush_rewrite_rules(false);
         error_log("✅ Manual rewrite rules added");
     }
+}, 10);
+
+add_action('template_redirect', function () {
+    if (get_query_var('orden_completada')) {
+        
+        require_once(JUZT_EXTENSION_TEMPLATE_PLUGIN_DIR . '/templates-php/order-completed.php');
+        exit;
+    }
+});
+
+add_filter('query_vars', function ($vars) {
+    $vars[] = 'orden_completada';
+    return $vars;
+});
+
+add_action('init', function () {
+    Frontend_API::instance();
 }, 10);

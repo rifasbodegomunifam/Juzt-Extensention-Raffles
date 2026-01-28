@@ -24,20 +24,20 @@ class RaffleCountDown extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
-        
+
         // Parsear la fecha
         if (this.date) {
             this.dateObject = new Date(this.date);
-            
+
             // Validar fecha
             if (isNaN(this.dateObject.getTime())) {
                 console.error('Invalid date format:', this.date);
                 return;
             }
-            
+
             // Calcular inicial
             this.updateCountdown();
-            
+
             // Actualizar cada segundo
             this.intervalId = setInterval(() => {
                 this.updateCountdown();
@@ -57,19 +57,22 @@ class RaffleCountDown extends LitElement {
             this.hours = 0;
             this.minutes = 0;
             this.seconds = 0;
-            
+
             // Detener el interval
             if (this.intervalId) {
                 clearInterval(this.intervalId);
                 this.intervalId = null;
             }
-            
+
             // Disparar evento personalizado
-            this.dispatchEvent(new CustomEvent('countdown-expired', {
+            this.dispatchEvent(new CustomEvent('raffle-countdown:ready', {
                 bubbles: true,
-                composed: true
+                composed: true,
+                detail: {
+                    status: this.expired,
+                }
             }));
-            
+
             return;
         }
 
@@ -78,6 +81,14 @@ class RaffleCountDown extends LitElement {
         this.hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         this.minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
         this.seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        this.dispatchEvent(new CustomEvent('raffle-countdown:ready', {
+            bubbles: true,
+            composed: true,
+            detail: {
+                status: this.expired,
+            }
+        }));
     }
 
     // Formato con ceros a la izquierda
@@ -122,7 +133,7 @@ class RaffleCountDown extends LitElement {
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        
+
         // Limpiar interval al desmontar
         if (this.intervalId) {
             clearInterval(this.intervalId);

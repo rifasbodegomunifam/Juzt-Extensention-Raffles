@@ -1,1 +1,11 @@
-<raffle-form raffle="{{ raffle }}"/>
+{# ✅ Crear objeto en Twig y convertirlo a JSON #}
+{% set rates = {
+    cop: cop.conversion_rate,
+    ves: ves.conversion_rate
+} %}
+
+
+<raffle-form 
+    raffle="{{ raffle }}" 
+    price="{{ price }}" 
+    rateexchange='{{ rates|json_encode }}' />

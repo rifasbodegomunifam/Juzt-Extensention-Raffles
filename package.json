@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-watch": "vite build --watch",
+    "build:watch": "vite build --watch",
     "build": "vite build",
     "dev": "vite"
   },

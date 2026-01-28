@@ -17,16 +17,20 @@ if (class_exists('Twig\Extension\AbstractExtension')) {
                 new TwigFunction('format_currency', [$this, 'formatCurrency']),
                 new TwigFunction('format_date', [$this, 'formatDate']),
                 new TwigFunction('share_url', [$this, 'getShareUrl']),
-                new TwigFunction('get_related_post', [$this, 'getRelatedPost'])
+                new TwigFunction('get_related_post', [$this, 'getRelatedPost']),
+                new TwigFunction('get_query_param', [$this, 'getQueryParam']),
+                new TwigFunction('get_raffle_order', [$this, 'getRaffleOrder'])
             ];
         }
 
-        public function getRelatedPost($post, $quantity=5){
+        public function getRelatedPost($post, $quantity=5, $args=array()){
             $related_args = array(
                 'post_type' => $post->post_type,
                 'post__not_in' => array($post->id),
                 'post_per_page' => $quantity
             );   
+
+            $related_args = array_merge($related_args, $args);
 
             return Timber::get_posts($related_args);
         }
@@ -191,6 +195,20 @@ if (class_exists('Twig\Extension\AbstractExtension')) {
             ];
 
             return $share_urls[strtolower($platform)] ?? '#';
+        }
+
+        public function getQueryParam($key, $default = null){
+            return isset($_GET[$key]) ? sanitize_text_field($_GET[$key]) : $default;
+        }
+
+        public function getRaffleOrder($id){
+            $order = sanitize_text_field($id);
+
+            if(empty($order)){
+                return null;
+            }
+
+            return Juzt_Raffle_Database::get_instance()->get_order_by_number($order);
         }
     }
 }

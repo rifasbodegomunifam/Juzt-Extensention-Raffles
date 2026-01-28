@@ -135,7 +135,7 @@ class RaffleController {
         ticket_limit: 100,
         gallery: [],
         prizes: [
-          { title: '', description: '', image: '', detail: '' }
+          { title: '', description: '', image: null, imageUrl: '', detail: '' }
         ],
         status: 'active'
       },
@@ -151,7 +151,7 @@ class RaffleController {
         ticket_limit: 100,
         gallery: [],
         prizes: [
-          { title: '', description: '', image: '', detail: '' }
+          { title: '', description: '', image: null, imageUrl: '', detail: '' }
         ],
         status: 'active'
       },
@@ -189,7 +189,6 @@ class RaffleController {
 
       // ✅ Nuevo método para resetear el formulario
       resetForm() {
-        // Crear una copia profunda del estado inicial
         this.raffle = {
           id: null,
           title: '',
@@ -198,26 +197,20 @@ class RaffleController {
           price: 0,
           allow_installments: false,
           ticket_limit: 100,
-          gallery: [],
+          gallery: [], // Array vacío
           prizes: [
-            { title: '', description: '', image: '', detail: '' }
+            { title: '', description: '', image: null, imageUrl: '', detail: '' }
           ],
           status: 'active'
         };
-
-        console.log("✅ Formulario reseteado");
       },
 
       async loadRaffle(id) {
         this.loading = true;
-        console.log("⏳ Cargando rifa ID:", id);
-
         try {
           const data = await raffleModel.getById(id);
-          console.log("✅ Datos recibidos:", data);
 
           if (data) {
-            // Asignar campo por campo
             this.raffle.id = data.id;
             this.raffle.title = data.title || '';
             this.raffle.date = data.date || '';
@@ -225,21 +218,74 @@ class RaffleController {
             this.raffle.price = parseFloat(data.price) || 0;
             this.raffle.allow_installments = Boolean(data.allow_installments);
             this.raffle.ticket_limit = parseInt(data.ticket_limit) || 100;
-            this.raffle.gallery = Array.isArray(data.gallery) ? [...data.gallery] : [];
-            this.raffle.prizes = Array.isArray(data.prizes) && data.prizes.length > 0
-              ? JSON.parse(JSON.stringify(data.prizes))
-              : [{ title: '', description: '', image: '', detail: '' }];
             this.raffle.status = data.status || 'active';
 
-            console.log("✅ Rifa cargada en formulario:", this.raffle);
+            // ✅ Manejar galería (compatibilidad con formato antiguo y nuevo)
+            this.raffle.gallery = await this.processGallery(data.gallery);
+
+            // ✅ Manejar premios
+            this.raffle.prizes = await this.processPrizes(data.prizes);
           }
         } catch (error) {
-          console.error("❌ Error cargando rifa:", error);
-          alert("Error al cargar la rifa");
+          console.error("❌ Error:", error);
         }
-
         this.loading = false;
       },
+
+      // ✅ Nuevo método para procesar galería
+      async processGallery(gallery) {
+        if (!Array.isArray(gallery) || gallery.length === 0) return [];
+
+        const processed = [];
+
+        for (const item of gallery) {
+          if (typeof item === 'string') {
+            // Formato antiguo: URL string
+            processed.push({ id: null, url: item });
+          } else if (typeof item === 'object' && item.id) {
+            // Formato nuevo: objeto con ID
+            // Si no tiene URL, obtenerla
+            const url = item.url || await this.getAttachmentUrl(item.id);
+            processed.push({ id: item.id, url });
+          } else if (typeof item === 'number') {
+            // Solo ID numérico
+            const url = await this.getAttachmentUrl(item);
+            processed.push({ id: item, url });
+          }
+        }
+
+        return processed;
+      },
+
+      // ✅ Nuevo método para procesar premios
+      async processPrizes(prizes) {
+        if (!Array.isArray(prizes) || prizes.length === 0) {
+          return [{ title: '', description: '', image: null, imageUrl: '', detail: '' }];
+        }
+
+        const processed = [];
+
+        for (const prize of prizes) {
+          const imageId = prize.image;
+          let imageUrl = prize.imageUrl || '';
+
+          // Si tiene ID pero no URL, obtenerla
+          if (imageId && !imageUrl) {
+            imageUrl = await this.getAttachmentUrl(imageId);
+          }
+
+          processed.push({
+            title: prize.title || '',
+            description: prize.description || '',
+            image: imageId || null,
+            imageUrl: imageUrl,
+            detail: prize.detail || ''
+          });
+        }
+
+        return processed;
+      },
+
 
       async saveRaffle() {
         console.log("💾 Guardando rifa:", this.raffle);
@@ -295,6 +341,23 @@ class RaffleController {
         }
       },
 
+      async getAttachmentUrl(attachmentId) {
+        if (!attachmentId) return '';
+
+        try {
+          const response = await fetch(`${window.raffleAppAdmin.ajaxurl}?action=get_attachment_url&attachment_id=${attachmentId}`, {
+            headers: {
+              'X-WP-Nonce': window.raffleAppAdmin.nonce
+            }
+          });
+          const data = await response.json();
+          return data.success ? data.data.url : '';
+        } catch (error) {
+          console.error('Error obteniendo URL:', error);
+          return '';
+        }
+      },
+
       openMediaLibrary(type = 'single', callback) {
         if (typeof wp === 'undefined' || !wp.media) {
           alert('Media Library no disponible');
@@ -311,14 +374,22 @@ class RaffleController {
           const selection = frame.state().get('selection');
 
           if (type === 'gallery') {
-            const urls = [];
+            // ✅ Guardar array de objetos {id, url}
+            const attachments = [];
             selection.each(attachment => {
-              urls.push(attachment.get('url'));
+              attachments.push({
+                id: attachment.get('id'),
+                url: attachment.get('url')
+              });
             });
-            callback(urls);
+            callback(attachments);
           } else {
             const attachment = selection.first();
-            callback(attachment.get('url'));
+            // ✅ Guardar objeto {id, url}
+            callback({
+              id: attachment.get('id'),
+              url: attachment.get('url')
+            });
           }
         });
 
@@ -326,14 +397,15 @@ class RaffleController {
       },
 
       selectGallery() {
-        this.openMediaLibrary('gallery', (urls) => {
-          this.raffle.gallery = urls;
+        this.openMediaLibrary('gallery', (attachments) => {
+          this.raffle.gallery = attachments; // Array de {id, url}
         });
       },
 
       selectPrizeImage(index) {
-        this.openMediaLibrary('single', (url) => {
-          this.raffle.prizes[index].image = url;
+        this.openMediaLibrary('single', (attachment) => {
+          this.raffle.prizes[index].image = attachment.id; // ✅ Solo ID
+          this.raffle.prizes[index].imageUrl = attachment.url; // Para preview
         });
       },
 
