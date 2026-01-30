@@ -1,6 +1,91 @@
 {% set orden_id = get_query_param('orden') %}
 {% set current_order = get_raffle_order(orden_id) %}
 
-{{ dump(current_order) }}
 
-<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde vero consectetur ipsum et earum quod dolores nulla officia necessitatibus laudantium delectus ad iure quas, dolore aperiam culpa illum qui eum!</p>
+<div class="min-h-screen py-8">
+	<div class="px-4 mx-auto md:px-4 max-w-7xl">
+        <header class="border-b border-red-600 w-full mb-8">
+            <h2 class="text-5xl text-red-600 font-(family-name:--head-fonts)">Orden completa #{{current_order.order_number}}</h2>
+        </header>
+        <table class="border border-red-600 rounded-lg text-white w-full mb-8">
+            <thead>
+                <tr>
+                    <th class="text-center text-2xl px-5 py-3 border-b border-red-600 font-(family-name:--head-fonts)">Rifa</th>
+                    <th class="text-center text-2xl px-5 py-3 border-b border-red-600 font-(family-name:--head-fonts)">Cant. de Tickets</th>
+                    <th class="text-center text-2xl px-5 py-3 border-b border-red-600 font-(family-name:--head-fonts)">Total de Orden (USD)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-center px-5 py-5 text-lg border-red-600 border-r border-b">
+                        <a
+                            class="text-red-600 text-4xl underline font-(family-name:--head-fonts)"
+                            aria-label="Enlace de rifa comprada"
+                            href="{{ current_order.raffle.permalink }}">{{ current_order.raffle.title }}
+                        </a>
+                    </td>
+                    <td class="text-center text-4xl px-5 py-5 border-red-600 border-r border-b font-(family-name:--head-fonts)">{{ current_order.ticket_quantity }}</td>
+                    <td class="text-center text-4xl px-5 py-5 border-red-600 border-b font-(family-name:--head-fonts)">{{ current_order.total_amount }}</td>
+                </tr>
+                <tr>
+                <td colspan="1" class="font-(family-name:--head-fonts) text-red-600 text-4xl border-red-600 border-r">Tus numeros</td>
+                {% if current_order.numbers | length > 0 and current_order.status == "completed" %}
+                <td colspan="2">
+                    <ul class="grid grid-cols-8 gap-2.5 p-1.5">
+                        {% for number in current_order.numbers %}
+                        <li class="bg-red-600 text-white text-center rounded-sm p-2">{{ number }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                {% else %}
+                <td colspan="2">Una vez aprobada tu orden. Te haremos llegar un email a {{ current_order.customer_email }} con los detalles de tus numeros generados a participar. Tambien podras visitar este mismo enlace, para poder validarlos tambien.<td>
+                {% endif %}
+                </tr>
+            </tbody>
+        </table>
+        <header class="border-b border-red-600 w-full mb-8">
+            <h3 class="text-5xl text-red-600 font-(family-name:--head-fonts)">Tu informacion</h3>
+        </header>
+        <table class="border border-red-600 rounded-lg text-white w-full mb-8">
+            <thead>
+                <tr>
+                    <th class="text-center text-2xl px-5 py-3 border-b border-red-600 font-(family-name:--head-fonts)">Nombre</th>
+                    <th class="text-center text-2xl px-5 py-3 border-b border-red-600 font-(family-name:--head-fonts)">Correo</th>
+                    <th class="text-center text-2xl px-5 py-3 border-b border-red-600 font-(family-name:--head-fonts)">Telefono</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-center text-4xl px-5 py-5 border-red-600 border-r font-(family-name:--head-fonts)">
+                        {{ current_order.customer_name }}
+                    </td>
+                    <td class="text-center text-4xl px-5 py-5 border-red-600 border-r font-(family-name:--head-fonts)">{{ current_order.customer_email }}</td>
+                    <td class="text-center text-4xl px-5 py-5 border-red-600 font-(family-name:--head-fonts)">{{ current_order.customer_phone }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <header class="border-b border-red-600 w-full mb-8">
+            <h3 class="text-5xl text-red-600 font-(family-name:--head-fonts)">Te podras ganar</h3>
+        </header>
+        <table class="border border-red-600 rounded-lg text-white w-full mb-8">
+            <thead>
+                <tr>
+                    <th class="text-center w-52 text-2xl px-5 py-3 border-b border-red-600 font-(family-name:--head-fonts)">Foto de referencia</th>
+                    <th class="text-center text-2xl px-5 py-3 border-b border-red-600 font-(family-name:--head-fonts)">Titulo</th>
+                    <th class="text-center text-2xl px-5 py-3 border-b border-red-600 font-(family-name:--head-fonts)">Descripcion</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prize in current_order.raffle.prizes %}
+                <tr>
+                    <td class="text-center text-4xl px-5 py-5 border-red-600 border-r">
+                        <img class="w-28 block mx-auto h-28 rounded-lg" srcset="{{ prize.image | attachment_srcset }}" aria-label="Imagen de referencia para premio {{prize.title}}" alt="{{ prize.title }}" />
+                    </td>
+                    <td class="text-lg px-5 py-5 border-red-600 border-r align-top">{{ prize.title }}</td>
+                    <td class="text-lg px-5 py-5 border-red-600 align-top">{{ prize.description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

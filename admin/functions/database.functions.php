@@ -269,6 +269,7 @@ class Juzt_Raffle_Database
 
         if ($order) {
             $order['numbers'] = $this->get_order_numbers($order['id']);
+            $order['raffle']  = $this->get_raffle($order['raffle_id']);
         }
 
         return $order;
@@ -833,6 +834,7 @@ class Juzt_Raffle_Database
         $raffle = [
             'id' => $raffle_id,
             'title' => $post->post_title,
+            'permalink' => get_permalink($raffle_id),
             'slug' => get_post_field('post_name', $raffle_id),
             'content' => $post->post_content,
             'price' => floatval(get_post_meta($raffle_id, '_raffle_price', true)),

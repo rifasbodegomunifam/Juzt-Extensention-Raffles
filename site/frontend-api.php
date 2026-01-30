@@ -38,7 +38,7 @@ class Frontend_API
             [
                 'methods' => 'POST',
                 'callback' => [$this, 'register_order'],
-                'permission_callback' => [$this, 'check_permission']
+                'permission_callback' => [$this, 'check_public_nonce']
             ]
         );
 
@@ -48,7 +48,7 @@ class Frontend_API
             [
                 'methods' => 'GET',
                 'callback' => [$this, 'test_rest'],
-                'permission_callback' => [$this, 'check_permission']
+                'permission_callback' => [$this, 'check_public_nonce']
             ]
         );
     }
@@ -107,7 +107,7 @@ class Frontend_API
                     $screenshot_url
                 );
 
-                if(!$payment_record){
+                if (!$payment_record) {
                     return new WP_Error('database_error', "Error al procesar orden (STP2)", ['status' => 400]);
                 }
 
@@ -116,7 +116,8 @@ class Frontend_API
                 $email = EmailHandler::generate_email('order-created', [
                     "order_id" => $result["order_id"],
                     "order_number" => $result["order_number"],
-                    "order_total"  => $result['total_ammount'],
+                    "order_total" => $result['total_ammount'],
+                    "order_quantity" => $order_data['ticket_quantity'],
                     "order_customer" => [
                         "name" => $order_data['customer_name'],
                         "email" => $order_data['customer_email'],
@@ -127,7 +128,7 @@ class Frontend_API
                 ]);
 
                 $send = EmailHandler::send(
-                    "uzcateguijesusdev@gmail.com",
+                    "rifaselbodegomunifam@gmail.com",
                     "Creacion de orden #{$result['order_number']}",
                     $email
                 );
@@ -135,7 +136,8 @@ class Frontend_API
                 $email_client = EmailHandler::generate_email('order-client-created', [
                     "order_id" => $result["order_id"],
                     "order_number" => $result["order_number"],
-                    "order_total"  => $result['total_ammount'],
+                    "order_total" => $result['total_ammount'],
+                    "order_quantity" => $order_data['ticket_quantity'],
                     "order_customer" => [
                         "name" => $order_data['customer_name'],
                         "email" => $order_data['customer_email'],
@@ -149,10 +151,10 @@ class Frontend_API
                     $order_data['customer_email'],
                     "Creacion de orden #{$result['order_number']}",
                     $email_client
-                );                
+                );
 
                 if (!$send or !$send_to_client) {
-                    return new WP_Error("email_error", "Error al procesar orden (STP3)", ["status"=> 400]);
+                    return new WP_Error("email_error", "Error al procesar orden (STP3)", ["status" => 400]);
                 }
 
             } else {
@@ -176,6 +178,30 @@ class Frontend_API
     public function check_permission()
     {
         return current_user_can('manage_options');
+    }
+
+    // ✅ Nueva función para verificar nonce
+    public function check_public_nonce($request)
+    {
+        $nonce = $request->get_header('X-WP-Nonce');
+
+        if (!$nonce) {
+            return new WP_Error(
+                'missing_nonce',
+                'Nonce requerido',
+                ['status' => 403]
+            );
+        }
+
+        if (!wp_verify_nonce($nonce, 'wp_rest')) {
+            return new WP_Error(
+                'invalid_nonce',
+                'Nonce inválido',
+                ['status' => 403]
+            );
+        }
+
+        return true;
     }
 
 }
