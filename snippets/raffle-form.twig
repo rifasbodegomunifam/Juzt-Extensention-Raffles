@@ -6,6 +6,7 @@
 
 
 <raffle-form 
+    payments='{{ payments | json_encode }}'
     raffle="{{ raffle }}" 
     price="{{ price }}" 
     rateexchange='{{ rates|json_encode }}' />

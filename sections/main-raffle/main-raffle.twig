@@ -176,10 +176,16 @@
 
 
 						<!-- Números -->
-							<h3 class="mb-3 font-semibold text-white"> Completa tu suerte!</h3>
+						<h3 class="mb-3 font-semibold text-white"> Completa tu suerte!</h3>
 
 						<div>
-							{{ snippet('raffle-form', {raffle: post.id, price: raffle_price, cop: raffle_price_cop, ves: raffle_price_ves}) }}
+							{{ snippet('raffle-form', {
+								raffle: post.id, 
+								price: raffle_price, 
+								cop: raffle_price_cop, 
+								ves: raffle_price_ves,
+								payments: section.blocks
+							}) }}
 						</div>
 
 						<!-- Trust -->

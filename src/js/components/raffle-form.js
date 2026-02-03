@@ -1,9 +1,12 @@
 import { LitElement, html } from 'lit';
+import Toastify from 'toastify-js';
+import "toastify-js/src/toastify.css";
 import HandleRequest from '../request';
 
 class RaffleForm extends LitElement {
 
     static properties = {
+        payments: { type: Array },
         raffle: { type: Number },
         price: { type: Number },
         rateexchange: { type: String },
@@ -22,6 +25,7 @@ class RaffleForm extends LitElement {
 
     constructor() {
         super();
+        this.payments = [];
         this.raffle = null;
         this.rateexchange = '{}';
         this.rates = {};
@@ -29,7 +33,7 @@ class RaffleForm extends LitElement {
         this.quantity = 1;
         this.ticketPrice = 0;
         this.totalPrice = 0;
-        this.totalRate = {cop: 0, ves: 0};
+        this.totalRate = { cop: 0, ves: 0 };
         this.selectedFile = null;
         this.loading = true;
         this.showForm = true;
@@ -40,6 +44,19 @@ class RaffleForm extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
+
+        // Parsear items si viene como string
+        if (typeof this.payments === 'string') {
+            try {
+                this.payments = JSON.parse(this.payments);
+            } catch (e) {
+                console.error('Error parsing menu items:', e);
+                this.payments = [];
+            }
+        }
+
+        console.log("payments:", this.payments);
+
         window.addEventListener('raffle-countdown:ready', (event) => {
             this.showForm = !event.detail.status;
             this.loading = false;
@@ -47,6 +64,40 @@ class RaffleForm extends LitElement {
         });
 
         console.log('Rates disponibles:', this.rates, this.rateexchange);
+    }
+
+    onCopy(value) {
+        navigator
+            .clipboard
+            .writeText(value)
+            .then(() => {
+                Toastify({
+                    text: "Valor copiado",
+                    duration: 1500,
+                    close: true,
+                    gravity: "top", // `top` or `bottom`
+                    position: "right", // `left`, `center` or `right`
+                    stopOnFocus: true, // Prevents dismissing of toast on hover
+                    style: {
+                        background: "oklch(0.577 0.245 27.325)",
+                    },
+                    onClick: function () { } // Callback after click
+                }).showToast();
+            })
+            .catch((error) => {
+                Toastify({
+                    text: "Error al copiar",
+                    duration: 1500,
+                    close: true,
+                    gravity: "top", // `top` or `bottom`
+                    position: "right", // `left`, `center` or `right`
+                    stopOnFocus: true, // Prevents dismissing of toast on hover
+                    style: {
+                        background: "oklch(0.577 0.245 27.325)",
+                    },
+                    onClick: function () { } // Callback after click
+                }).showToast();
+            });
     }
 
     // ✅ Agregar este lifecycle method
@@ -321,23 +372,23 @@ class RaffleForm extends LitElement {
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-300 font-medium">Total a pagar:</span>
                                 <span class="text-md font-bold text-red-500">${new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 2, 
-                                    maximumFractionDigits: 2
-                                }).format(this.totalPrice)}</span>
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(this.totalPrice)}</span>
                                 <span class="text-md font-bold text-red-500">${new Intl.NumberFormat('es-CO', {
-                                    style: 'currency',
-                                    currency: 'COP',
-                                    minimumFractionDigits: 2, 
-                                    maximumFractionDigits: 2
-                                }).format(this.totalRate.cop)}</span>
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(this.totalRate.cop)}</span>
                                 <span class="text-md font-bold text-red-500">${new Intl.NumberFormat('es-VE', {
-                                    style: 'currency',
-                                    currency: 'VES',
-                                    minimumFractionDigits: 2, 
-                                    maximumFractionDigits: 2
-                                }).format(this.totalRate.ves)}</span>
+            style: 'currency',
+            currency: 'VES',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(this.totalRate.ves)}</span>
                             </div>
                         </div>
                     </div>
@@ -351,24 +402,51 @@ class RaffleForm extends LitElement {
                         </svg>
                         Comprobante de Pago
                     </h2>
+                    
+                    <p class="text-lg text-gray-300 mb-2">Realiza tu transferencia a:</p>
 
-                    <div class="mb-4 p-4 bg-[#0f0f0f] border border-gray-700 rounded-lg">
-                        <p class="text-sm text-gray-300 mb-2">Realiza tu transferencia a:</p>
-                        <div class="space-y-1 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Banco:</span>
-                                <span class="text-white font-semibold">Bancolombia</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Cuenta:</span>
-                                <span class="text-white font-semibold">123-456789-10</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Titular:</span>
-                                <span class="text-white font-semibold">RifasPro SAS</span>
+                    ${this.payments.map((item) => html`
+
+                        <div class="mb-4 p-4 bg-[#0f0f0f] border border-gray-700 rounded-lg">
+                            <div class="space-y-1 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Banco:</span>
+                                    <span class="text-white font-semibold">${item.settings.account_bank}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Tipo:</span>
+                                    <div class="flex justify-between gap-x-2.5">
+                                        <span class="text-white font-semibold">${item.settings.account_type}</span>
+                                        <button @click=${() => this.onCopy(item.settings.account_type)} type="button" class="flex gap-1 items-center cursor-pointer">
+                                            <lucide-icon name="copy" size="16"></lucide-icon>
+                                            <span>Copiar</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between gap-2.5 items-center">
+                                    <span class="text-gray-400">Cuenta:</span>
+                                    <div class="flex justify-between gap-x-2.5">
+                                        <span class="text-white font-semibold">${item.settings.account_number}</span>
+                                        <button @click=${() => this.onCopy(item.settings.account_number)} type="button" class="flex gap-1 items-center cursor-pointer">
+                                            <lucide-icon name="copy" size="16"></lucide-icon>
+                                            <span>Copiar</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Titular:</span>
+                                    <div class="flex justify-between gap-x-2.5">
+                                        <span class="text-white font-semibold">${item.settings.account_name}</span>
+                                        <button @click=${() => this.onCopy(item.settings.account_name)} type="button" class="flex gap-1 items-center cursor-pointer">
+                                            <lucide-icon name="copy" size="16"></lucide-icon>
+                                            <span>Copiar</span>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+
+                    `)}
 
                     <div>
                         <label for="comprobante" class="block text-sm font-medium text-gray-300 mb-2">

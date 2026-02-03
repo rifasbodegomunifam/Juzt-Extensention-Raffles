@@ -12,7 +12,35 @@
             "settings": {
                 "layout": "divide"
             },
-            "blocks": []
+            "blocks": [
+                {
+                    "type": "pyment",
+                    "settings": {
+                        "account_bank": "Binance",
+                        "account_number": "nenegocho@gmail.com ",
+                        "account_type": "Online",
+                        "account_name": "Jesus Cuauro Araque"
+                    }
+                },
+                {
+                    "type": "pyment",
+                    "settings": {
+                        "account_bank": "Zelle",
+                        "account_number": "bodegomunifam.rc@gmail.com ",
+                        "account_type": "Online",
+                        "account_name": "Jesus Cuauro Araque"
+                    }
+                },
+                {
+                    "type": "pyment",
+                    "settings": {
+                        "account_bank": "Bancolombia",
+                        "account_number": "94400004807",
+                        "account_type": "Ahorros",
+                        "account_name": "Carmen Araque Zambrano "
+                    }
+                }
+            ]
         },
         "section_1765978613813": {
             "section_id": "related-raffle",

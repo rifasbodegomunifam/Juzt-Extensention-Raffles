@@ -12,5 +12,33 @@ return [
                 'divide' => 'Divide'         
             ]
         ]
+    ],
+    "blocks" => [
+        "pyment" => [
+            "name" => "Metodo de pago",
+            "description" => "Registre un metodo de pago aquí",
+            "settings" => [
+                "account_bank" => [
+                    "type" => "text",
+                    "label" => "Titulo",
+                    "default" => "Nombre del banco."
+                ],
+                "account_number" => [
+                    "type" => "text",
+                    "label" => "Numero de cuenta",
+                    "default" => "00000000"
+                ],
+                "account_type" => [
+                    "type" => "text",
+                    "label" => "Tipo de cuenta",
+                    "default" => "Ahorros"
+                ],
+                "account_name" => [
+                    "type" => "text",
+                    "label" => "Titular",
+                    "default" => "Jesus"
+                ]
+            ]
+        ]
     ]
 ];
