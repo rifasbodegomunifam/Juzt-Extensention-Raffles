@@ -369,7 +369,7 @@ class RaffleForm extends LitElement {
                         </div>
                         
                         <div class="mt-4 p-4 bg-red-600/10 border border-red-600/30 rounded-lg">
-                            <div class="flex justify-between items-center">
+                            <div class="flex justify-between items-center flex-col lg:flex-row!">
                                 <span class="text-gray-300 font-medium">Total a pagar:</span>
                                 <span class="text-md font-bold text-red-500">${new Intl.NumberFormat('en-US', {
             style: 'currency',
@@ -415,7 +415,7 @@ class RaffleForm extends LitElement {
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-400">Tipo:</span>
-                                    <div class="flex justify-between gap-x-2.5">
+                                    <div class="flex justify-end lg:justify-between! gap-x-2.5 flex-wrap">
                                         <span class="text-white font-semibold">${item.settings.account_type}</span>
                                         <button @click=${() => this.onCopy(item.settings.account_type)} type="button" class="flex gap-1 items-center cursor-pointer">
                                             <lucide-icon name="copy" size="16"></lucide-icon>
@@ -425,7 +425,7 @@ class RaffleForm extends LitElement {
                                 </div>
                                 <div class="flex justify-between gap-2.5 items-center">
                                     <span class="text-gray-400">Cuenta:</span>
-                                    <div class="flex justify-between gap-x-2.5">
+                                    <div class="flex justify-end lg:justify-between! gap-x-2.5 flex-wrap">
                                         <span class="text-white font-semibold">${item.settings.account_number}</span>
                                         <button @click=${() => this.onCopy(item.settings.account_number)} type="button" class="flex gap-1 items-center cursor-pointer">
                                             <lucide-icon name="copy" size="16"></lucide-icon>
@@ -435,7 +435,7 @@ class RaffleForm extends LitElement {
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-400">Titular:</span>
-                                    <div class="flex justify-between gap-x-2.5">
+                                    <div class="flex justify-end lg:justify-between! gap-x-2.5 flex-wrap">
                                         <span class="text-white font-semibold">${item.settings.account_name}</span>
                                         <button @click=${() => this.onCopy(item.settings.account_name)} type="button" class="flex gap-1 items-center cursor-pointer">
                                             <lucide-icon name="copy" size="16"></lucide-icon>
