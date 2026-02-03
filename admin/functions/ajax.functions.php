@@ -219,10 +219,57 @@ function juzt_reject_order_handler()
     $db->add_rejection_reason($order_id, $reason);
 
     // TODO: Enviar email al cliente notificando el rechazo
+    $email = EmailHandler::generate_email("order-client-rejected", [
+        "order" => $order,
+        "reason" => $reason, 
+    ]);
+
+    $send = EmailHandler::send(
+        $order["customer_email"],
+        "Tu orden " . $order["order_number"] . " ha sido rechazada",
+        $email
+    );
 
     wp_send_json_success([
-        'message' => 'Orden rechazada exitosamente'
+        'message' => 'Orden rechazada exitosamente',
+        "send" => $send
     ]);
+}
+
+
+add_action('wp_ajax_juzt_reject_payment', 'juzt_reject_payment_handler');
+
+function juzt_reject_payment_handler(){
+    check_ajax_referer('juzt_raffle_nonce', 'nonce');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(['message' => 'No tienes permisos']);
+        return;
+    }
+
+    $order_id = isset($_POST['order_id']) ? intval($_POST['order_id']) : 0;
+    $installment_number = isset($_POST['installment_number']) ? intval($_POST['installment_number']) : 0;
+    $reason = isset($_POST['reason']) ? sanitize_textarea_field($_POST['reason']) : '';
+
+    if (!$order_id || !$installment_number) {
+        wp_send_json_error(['message' => 'Datos inválidos']);
+        return;
+    }
+
+    $db = Juzt_Raffle_Database::get_instance();
+    $user_id = get_current_user_id();
+
+    $result = $db->reject_payment($order_id, $installment_number, $reason, $user_id);
+
+    if ($result) {
+        wp_send_json_success([
+            'message' => "Pago de cuota #{$installment_number} rechazada exitosamente"
+        ]);
+
+        
+    } else {
+        wp_send_json_error(['message' => 'Error al rechzar el pago']);
+    }
 }
 
 /**
