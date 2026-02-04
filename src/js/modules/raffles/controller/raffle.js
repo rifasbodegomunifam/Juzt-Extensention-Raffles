@@ -127,6 +127,7 @@ class RaffleController {
       // Estado inicial del formulario
       raffleInitialState: {
         id: null,
+        buy_from_one: 'paused',
         title: '',
         date: '',
         content: '',
@@ -137,12 +138,14 @@ class RaffleController {
         prizes: [
           { title: '', description: '', image: null, imageUrl: '', detail: '' }
         ],
-        status: 'active'
+        status: 'active',
+
       },
 
       // Datos del formulario
       raffle: {
         id: null,
+        buy_from_one: 'paused',
         title: '',
         date: '',
         content: '',
@@ -192,6 +195,7 @@ class RaffleController {
         this.raffle = {
           id: null,
           title: '',
+          buy_from_one: 'paused',
           date: '',
           content: '',
           price: 0,
@@ -210,8 +214,11 @@ class RaffleController {
         try {
           const data = await raffleModel.getById(id);
 
+          console.log("HOLA", data);
+
           if (data) {
             this.raffle.id = data.id;
+            this.raffle.buy_from_one = data.buy_from_one;
             this.raffle.title = data.title || '';
             this.raffle.date = data.date || '';
             this.raffle.content = data.content || '';

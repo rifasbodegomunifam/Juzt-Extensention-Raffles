@@ -55,12 +55,12 @@ class DashboardController {
             get filteredOrders() {
                 let filtered = this.orders;
                 
-                if (this.filters.status) {
+                if (this.filters?.status) {
                     filtered = filtered.filter(o => o.status === this.filters.status);
                 }
                 
-                if (this.filters.search) {
-                    const search = this.filters.search.toLowerCase();
+                if (this.filters?.search) {
+                    const search = this.filters?.search.toLowerCase();
                     filtered = filtered.filter(o => 
                         o.order_number.toLowerCase().includes(search) ||
                         o.customer_name.toLowerCase().includes(search) ||

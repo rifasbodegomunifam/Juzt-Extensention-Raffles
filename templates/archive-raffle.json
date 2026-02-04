@@ -9,8 +9,8 @@
         "section_1766175013565": {
             "section_id": "archive-raffle",
             "settings": {
-                "number_cols": 3,
-                "number_posts": 2
+                "number_cols": 2,
+                "number_posts": 10
             },
             "blocks": []
         }

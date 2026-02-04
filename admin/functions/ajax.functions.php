@@ -317,6 +317,7 @@ function juzt_get_raffles_handler()
                 'tickets_sold' => intval(get_post_meta($post_id, '_raffle_tickets_sold', true)),
                 'status' => get_post_meta($post_id, '_raffle_status', true) ?: 'active',
                 'date' => get_post_meta($post_id, '_raffle_date', true) ?: null,
+                'buy_from_one' => get_post_meta($post_id, '_raffle_buy_from_one', true) ?: 'paused',
                 'created_at' => get_the_date('Y-m-d H:i:s'),
             ];
         }
@@ -558,6 +559,7 @@ function juzt_get_raffle_handler()
 
     $raffle = [
         'id' => $raffle_id,
+        'buy_from_one' => get_post_meta($raffle_id, '_raffle_buy_from_one', true) ?: 'paused',
         'title' => $post->post_title,
         'slug' => get_post_field('post_name', $raffle_id),
         'content' => $post->post_content,
@@ -622,6 +624,8 @@ function juzt_create_raffle_handler()
         update_post_meta($post_id, '_raffle_ticket_limit', intval($raffle_data['ticket_limit']));
         update_post_meta($post_id, '_raffle_status', sanitize_text_field($raffle_data['status']));
         update_post_meta($post_id, '_raffle_tickets_sold', 0);
+
+        update_post_meta($post_id, '_raffle_buy_from_one', sanitize_text_field($raffle_data['buy_from_one']), 'paused');
 
         // Guardar galería de imágenes
         if (!empty($raffle_data['gallery']) && is_array($raffle_data['gallery'])) {
@@ -715,6 +719,7 @@ function juzt_update_raffle_handler()
     update_post_meta($raffle_id, '_raffle_ticket_limit', intval($raffle_data['ticket_limit']));
     update_post_meta($raffle_id, '_raffle_status', sanitize_text_field($raffle_data['status']));
     update_post_meta($raffle_id, '_raffle_date', $raffle_data['date']);
+    update_post_meta($raffle_id, '_raffle_buy_from_one', sanitize_text_field($raffle_data['buy_from_one']), 'paused');
 
     // Actualizar galería
     if (!empty($raffle_data['gallery']) && is_array($raffle_data['gallery'])) {

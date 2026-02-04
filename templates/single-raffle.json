@@ -3,8 +3,7 @@
     "description": "Template for CTP Raffles",
     "template": true,
     "order": [
-        "main-raffle",
-        "section_1765978613813"
+        "main-raffle"
     ],
     "sections": {
         "main-raffle": {
@@ -41,14 +40,6 @@
                     }
                 }
             ]
-        },
-        "section_1765978613813": {
-            "section_id": "related-raffle",
-            "settings": {
-                "mode": "carousel",
-                "quantity": 6
-            },
-            "blocks": []
         }
     },
     "post_type": "raffle"

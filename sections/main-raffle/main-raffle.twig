@@ -2,6 +2,7 @@
 {% set raffle_gallery  = get_post_meta("_raffle_gallery", post.id) %}
 {% set raffle_date  = get_post_meta("_raffle_date", post.id) %}
 {% set raffle_price  = get_post_meta("_raffle_price", post.id) %}
+{% set raffle_show_one = get_post_meta("_raffle_buy_from_one", post.id) %}
 {% set raffle_price_cop = exchange_api_convert(raffle_price, "usd", "cop") %}
 {% set raffle_price_ves = exchange_api_convert(raffle_price, "usd", "ves") %}
 
@@ -71,7 +72,8 @@
 						price: raffle_price, 
 						cop: raffle_price_cop, 
 						ves: raffle_price_ves,
-						payments: section.blocks
+						payments: section.blocks,
+						show_one: raffle_show_one
 					}) }}
 				</div>
 
@@ -104,7 +106,7 @@
 				{{ snippet('share-banner', { facebook: share_url('facebook', share_uri, share_title), twitter: share_url('twitter', share_uri, share_title), whatsapp: share_url('whatsapp', share_uri, share_title) }) }}
 
 				<!-- Descripción -->
-				<div class="bg-[#1a1a1a] rounded-2xl p-4 md:p-6 border border-gray-800">
+				<div class="bg-[#1a1a1a] hidden rounded-2xl p-4 md:p-6 border border-gray-800">
 					<h2 class="mb-4 text-2xl font-bold text-white">Descripción del Premio</h2>
 
 					<div class="mb-5">
@@ -137,7 +139,8 @@
 								price: raffle_price, 
 								cop: raffle_price_cop, 
 								ves: raffle_price_ves,
-								payments: section.blocks
+								payments: section.blocks,
+								show_one: raffle_show_one
 							}) }}
 						</div>
 

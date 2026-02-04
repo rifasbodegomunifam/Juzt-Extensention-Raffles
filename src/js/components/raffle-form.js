@@ -15,7 +15,8 @@ class RaffleForm extends LitElement {
         selectedFile: { type: Object },
         cta_text: { type: String },
         loading: { type: Boolean },
-        proccesing: { type: Boolean }
+        proccesing: { type: Boolean },
+        showone: {type: String}
     };
 
     // ESTO DESACTIVA EL SHADOW DOM
@@ -39,6 +40,8 @@ class RaffleForm extends LitElement {
         this.showForm = true;
         this.proccesing = false;
         this.cta_text = "Confirmar Compra";
+        this.showone = "paused";
+        this.numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
     }
 
@@ -62,6 +65,11 @@ class RaffleForm extends LitElement {
             this.loading = false;
             console.log("Aqui");
         });
+
+        if(this.showone == "paused"){
+            this.numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+            this.quantity = 2;
+        }
 
         this.loading = false;
 
@@ -133,7 +141,12 @@ class RaffleForm extends LitElement {
     }
 
     decrementQuantity() {
-        if (this.quantity > 1) {
+        let limit = 1;
+        if(this.showone == 'paused'){
+            limit = 2;
+        }
+
+        if (this.quantity > limit) {
             this.quantity--;
             this.updateTotal();
         }
@@ -226,6 +239,27 @@ class RaffleForm extends LitElement {
                 <h3 class="text-3xl text-center font-bold text-white mb-6">Sorteo finalizado</h3>
             </main> 
             `;
+        }
+
+        const decrementClass = [
+            'w-12',
+            'h-12',
+            'bg-red-600',
+            'hover:bg-red-700',
+            'text-white',
+            'rounded-lg',
+            'font-bold',
+            'text-xl',
+            'transition-colors',
+            'flex',
+            'items-center',
+            'justify-center',
+        ];
+
+        if((this.showone === "paused" && this.quantity === 2) || (this.showone === 'active' && this.quantity == 1)){
+            decrementClass.push('pointer-none cursor-not-allowed');
+        } else {
+            decrementClass.push('cursor-pointer');
         }
 
         return html`
@@ -326,7 +360,8 @@ class RaffleForm extends LitElement {
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-300 mb-3">Selección rápida:</label>
                         <div class="grid grid-cols-5 gap-2">
-                            ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(qty => html`
+                            
+                            ${this.numbers.map(qty => html`
                                 <button
                                     type="button"
                                     @click=${() => this.setQuantity(qty)}
@@ -344,7 +379,8 @@ class RaffleForm extends LitElement {
                             <button
                                 type="button"
                                 @click=${this.decrementQuantity}
-                                class="w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xl transition-colors flex items-center justify-center cursor-pointer"
+                                class="${decrementClass.join(" ")}"
+                                ${(this.showone == 'paused' && this.quantity == 2) ? 'disabled' : ''}
                             >
                                 -
                             </button>

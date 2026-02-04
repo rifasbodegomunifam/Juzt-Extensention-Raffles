@@ -73,7 +73,7 @@
                 </div>
 
                 <!-- Grid: Precio y Boletos -->
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
                     <!-- Precio -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700">
@@ -107,6 +107,18 @@
                             <option value="paused">Pausada</option>
                             <option value="completed">Completada</option>
                             <option value="cancelled">Cancelada</option>
+                        </select>
+                    </div>
+
+                    <!-- Estado -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">
+                            Se puede activar la compra de 1 ticket
+                        </label>
+                        <select x-model="raffle.buy_from_one"
+                            class="block px-4 py-2 mt-1 w-full rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="active">Activa</option>
+                            <option value="paused">Pausada</option>
                         </select>
                     </div>
                 </div>
