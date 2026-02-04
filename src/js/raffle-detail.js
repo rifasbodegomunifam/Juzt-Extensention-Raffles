@@ -1,4 +1,5 @@
 import { createIcons, icons } from 'lucide';
+import './components/raffle-details';
 import "./components/raffle-form";
 import "./components/raffle-gallery";
 import "./components/raffle-countdown";
