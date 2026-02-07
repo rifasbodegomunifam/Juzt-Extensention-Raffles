@@ -172,18 +172,53 @@ class RaffleForm extends LitElement {
         const file = event.target.files[0];
         if (!file) return;
 
-        if (file.size > 5 * 1024 * 1024) {
-            alert('El archivo es demasiado grande. Máximo 5MB.');
+        // ✅ Validar que sea imagen
+        const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!validImageTypes.includes(file.type)) {
+            Toastify({
+                text: "Solo se aceptan imágenes (JPG, PNG, GIF, WEBP)",
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: "#dc2626",
+                }
+            }).showToast();
+
             event.target.value = '';
             return;
         }
 
-        this.selectedFile = {
-            name: file.name,
-            size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-            file: file
+        // ✅ Validar tamaño
+        if (file.size > 5 * 1024 * 1024) {
+            Toastify({
+                text: "La imagen es demasiado grande. Máximo 5MB",
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: "#dc2626",
+                }
+            }).showToast();
+
+            event.target.value = '';
+            return;
+        }
+
+        // ✅ Crear preview de la imagen
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.selectedFile = {
+                name: file.name,
+                size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                file: file,
+                preview: e.target.result // Base64 para preview
+            };
+            console.log(this.selectedFile);
         };
-        console.log(this.selectedFile);
+        reader.readAsDataURL(file);
     }
 
     removeFile() {
