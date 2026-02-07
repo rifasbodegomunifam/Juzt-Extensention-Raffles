@@ -17,7 +17,7 @@ class RaffleForm extends LitElement {
         cta_text: { type: String },
         loading: { type: Boolean },
         proccesing: { type: Boolean },
-        showone: {type: String}
+        showone: { type: String }
     };
 
     static styles = [css`${unsafeCSS(filecss)}`];
@@ -69,7 +69,7 @@ class RaffleForm extends LitElement {
             console.log("Aqui");
         });
 
-        if(this.showone == "paused"){
+        if (this.showone == "paused") {
             this.numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10];
             this.quantity = 2;
         }
@@ -145,7 +145,7 @@ class RaffleForm extends LitElement {
 
     decrementQuantity() {
         let limit = 1;
-        if(this.showone == 'paused'){
+        if (this.showone == 'paused') {
             limit = 2;
         }
 
@@ -171,13 +171,13 @@ class RaffleForm extends LitElement {
     handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file) return;
-        
+
         if (file.size > 5 * 1024 * 1024) {
             alert('El archivo es demasiado grande. Máximo 5MB.');
             event.target.value = '';
             return;
         }
-        
+
         this.selectedFile = {
             name: file.name,
             size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
@@ -213,7 +213,7 @@ class RaffleForm extends LitElement {
             console.log('Datos del formulario:', data);
             const order_create = await HandleRequest.saveOrder(data);
 
-            console.log('orden', order_create);
+            console.log('Orden creada:', order_create);
 
             this.proccesing = false;
             this.cta_text = "Orden creada, redirigiendo en 5 segundos";
@@ -223,9 +223,29 @@ class RaffleForm extends LitElement {
             }, 5000);
 
         } catch (error) {
-            this.cta_text = "Ha ocurrido un error al procesar la orden.";
-        }
+            console.error('Error capturado:', error);
 
+            this.proccesing = false;
+            this.cta_text = "Error al procesar orden";
+
+            // ✅ Mostrar toast con el error
+            Toastify({
+                text: error.message || "Ha ocurrido un error al procesar la orden",
+                duration: 5000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+                style: {
+                    background: "#dc2626", // Rojo
+                }
+            }).showToast();
+
+            // ✅ Resetear después de 3 segundos
+            setTimeout(() => {
+                this.cta_text = "Confirmar Compra";
+            }, 3000);
+        }
     }
 
     render() {
@@ -260,7 +280,7 @@ class RaffleForm extends LitElement {
             'justify-center',
         ];
 
-        if((this.showone === "paused" && this.quantity === 2) || (this.showone === 'active' && this.quantity == 1)){
+        if ((this.showone === "paused" && this.quantity === 2) || (this.showone === 'active' && this.quantity == 1)) {
             decrementClass.push('pointer-none cursor-not-allowed');
         } else {
             decrementClass.push('cursor-pointer');
@@ -522,7 +542,7 @@ class RaffleForm extends LitElement {
                             </label>
                         </div>
 
-                        ${ (this.selectedFile != null || this.selectedFile != undefined) ? html`
+                        ${(this.selectedFile != null || this.selectedFile != undefined) ? html`
                             <div class="mt-4 p-4 bg-[#0f0f0f] border border-green-600 rounded-lg">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3">

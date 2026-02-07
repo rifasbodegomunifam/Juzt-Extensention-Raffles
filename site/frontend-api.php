@@ -55,6 +55,7 @@ class Frontend_API
 
     public function register_order($request)
     {
+        
         $order_data = array(
             'raffle_id' => $request->get_param('raffle_id'),
             'customer_name' => $request->get_param('customer_name'),
