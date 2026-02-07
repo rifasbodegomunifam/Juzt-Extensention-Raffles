@@ -1,7 +1,8 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import Toastify from 'toastify-js';
 import "toastify-js/src/toastify.css";
 import HandleRequest from '../request';
+import filecss from '../../../assets/css/index.css?inline';
 
 class RaffleForm extends LitElement {
 
@@ -19,10 +20,12 @@ class RaffleForm extends LitElement {
         showone: {type: String}
     };
 
+    static styles = [css`${unsafeCSS(filecss)}`];
+
     // ESTO DESACTIVA EL SHADOW DOM
-    createRenderRoot() {
+    /*createRenderRoot() {
         return this; // Usa Light DOM en lugar de Shadow DOM
-    }
+    }*/
 
     constructor() {
         super();
@@ -168,18 +171,19 @@ class RaffleForm extends LitElement {
     handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file) return;
-
+        
         if (file.size > 5 * 1024 * 1024) {
             alert('El archivo es demasiado grande. Máximo 5MB.');
             event.target.value = '';
             return;
         }
-
+        
         this.selectedFile = {
             name: file.name,
             size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
             file: file
         };
+        console.log(this.selectedFile);
     }
 
     removeFile() {
@@ -518,7 +522,7 @@ class RaffleForm extends LitElement {
                             </label>
                         </div>
 
-                        ${this.selectedFile ? html`
+                        ${ (this.selectedFile != null || this.selectedFile != undefined) ? html`
                             <div class="mt-4 p-4 bg-[#0f0f0f] border border-green-600 rounded-lg">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3">

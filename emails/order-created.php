@@ -79,8 +79,8 @@
                   <table border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                     <tr>
                       <td align="center" style="">
-                        <!--<a href="https://rifasbodegomunifam.com/wp-admin/admin.php?page=juzt-raffle#/order/view/<?php echo $order_id; ?>" target="_blank" style="padding: 15px 10px; color: #ffffff; text-decoration: none; font-weight: 400; display: block; width: 100%; border-radius: 4px; border: solid 1px #FFF;">Ver en admin</a>-->
-                        <a href="http://rifas-boodegom-unifam-v6.localhost:8080/wp-admin/admin.php?page=juzt-raffle#/order/view/<?php echo $order_id; ?>" target="_blank" style="padding: 15px 10px; color: #ffffff; text-decoration: none; font-weight: 400; display: block; width: 100%; border-radius: 4px; border: solid 1px #FFF;">Ver en admin</a>
+                        <a href="https://rifasbodegomunifam.com/wp-admin/admin.php?page=juzt-raffle#/order/view/<?php echo $order_id; ?>" target="_blank" style="padding: 15px 10px; color: #ffffff; text-decoration: none; font-weight: 400; display: block; width: 100%; border-radius: 4px; border: solid 1px #FFF;">Ver en admin</a>
+                        <a style="display: none;" href="http://rifas-boodegom-unifam-v6.localhost:8080/wp-admin/admin.php?page=juzt-raffle#/order/view/<?php echo $order_id; ?>" target="_blank" style="padding: 15px 10px; color: #ffffff; text-decoration: none; font-weight: 400; display: block; width: 100%; border-radius: 4px; border: solid 1px #FFF;">Ver en admin</a>
                       </td>
                     </tr>
                   </table>
