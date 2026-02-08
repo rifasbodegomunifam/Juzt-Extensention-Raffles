@@ -3,6 +3,7 @@ class HandleRequest {
     static apiBase = `/wp-json/juzt-raffle-extension/frontend/v1`;
 
     constructor() {
+        console.log("vuukd");
     }
 
     // request.js

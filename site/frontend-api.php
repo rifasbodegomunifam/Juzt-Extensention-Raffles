@@ -23,13 +23,6 @@ class Frontend_API
         add_action("rest_api_init", array($this, "register_routes"));
     }
 
-    public function localize_script()
-    {
-        wp_localize_script('detail-raffle', 'juztExtensionRaffle', [
-            'nonce' => wp_create_nonce('wp_rest'),
-        ]);
-    }
-
     public function register_routes()
     {
         register_rest_route(

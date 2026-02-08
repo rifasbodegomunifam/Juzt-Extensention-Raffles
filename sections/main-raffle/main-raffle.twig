@@ -180,10 +180,12 @@
 	</div>
 </div>
 
-{{ enqueue_asset('js', 'detail-raffle', '/js/raffleDetail.js?version=' ~ time_seconds(), asset_source) }}
-{{ enqueue_asset('css', 'detail-raffle-css', '/css/raffleDetail.css?version=' ~ time_seconds(), asset_source) }}
-
 {{ localize_script('JuztExtensionRaffle', {
     nonce: wp_nonce('wp_rest'),
     apiUrl: '/wp-json/juzt-raffle-extension/frontend/v1'
 }) }}
+
+
+{{ enqueue_asset('js', 'detail-raffle', '/js/raffleDetail.js?version=' ~ time_seconds(), asset_source) }}
+{{ enqueue_asset('css', 'detail-raffle-css', '/css/raffleDetail.css?version=' ~ time_seconds(), asset_source) }}
+
