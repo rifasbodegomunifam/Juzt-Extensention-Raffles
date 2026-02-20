@@ -10,6 +10,49 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+add_action('wp_ajax_juzt_mavise_order', 'juzt_masive_actions');
+function juzt_masive_actions()
+{
+    check_ajax_referer('juzt_raffle_nonce', 'nonce');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(['message' => 'No tienes permisos']);
+        return;
+    }
+
+    if (empty($_POST['data']) || empty($_POST['todo'])) {
+        wp_send_json_error(['message' => 'Datos incompletos']);
+        return;
+    }
+
+    $action = sanitize_text_field($_POST['todo']);
+    $data = $_POST['data'];
+    $data_clean = stripslashes($data);
+    $decoded = json_decode($data_clean, true);
+
+    // Validar que sea array y sanitizar
+    if (!is_array($decoded) || empty($decoded)) {
+        wp_send_json_error(['message' => 'Datos inválidos']);
+        return;
+    }
+
+    // Sanitizar cada ID (asegurar que sean números)
+    $order_ids = array_map('intval', $decoded);
+    $order_ids = array_filter($order_ids);
+
+    $dbTransactionManager = new DbTransactionManager();
+
+    if(trim($action) === "remove"){
+        $result = $dbTransactionManager->delete_masive_orders($order_ids);
+    } else if( trim($action) === "approve" ){
+        $result = $dbTransactionManager->approve_masive_orders($order_ids);
+    } else if( trim($action) === "reject" ){
+        $result = $dbTransactionManager->reject_masive_orders($order_ids);
+    }
+
+    wp_send_json_success($result);
+}
+
 // ============================================
 // OBTENER TODAS LAS ÓRDENES
 // ============================================
@@ -221,7 +264,7 @@ function juzt_reject_order_handler()
     // TODO: Enviar email al cliente notificando el rechazo
     $email = EmailHandler::generate_email("order-client-rejected", [
         "order" => $order,
-        "reason" => $reason, 
+        "reason" => $reason,
     ]);
 
     $send = EmailHandler::send(
@@ -239,7 +282,8 @@ function juzt_reject_order_handler()
 
 add_action('wp_ajax_juzt_reject_payment', 'juzt_reject_payment_handler');
 
-function juzt_reject_payment_handler(){
+function juzt_reject_payment_handler()
+{
     check_ajax_referer('juzt_raffle_nonce', 'nonce');
 
     if (!current_user_can('manage_options')) {
@@ -266,7 +310,7 @@ function juzt_reject_payment_handler(){
             'message' => "Pago de cuota #{$installment_number} rechazada exitosamente"
         ]);
 
-        
+
     } else {
         wp_send_json_error(['message' => 'Error al rechzar el pago']);
     }
@@ -413,7 +457,7 @@ function juzt_verify_payment_handler()
             'message' => "Pago de cuota #{$installment_number} verificado exitosamente"
         ]);
 
-        
+
     } else {
         wp_send_json_error(['message' => 'Error al verificar el pago']);
     }
@@ -570,6 +614,7 @@ function juzt_get_raffle_handler()
         'date' => get_post_meta($raffle_id, '_raffle_date', true) ?: null,
         'gallery' => $gallery,
         'prizes' => $prizes,
+        'numbers' => Juzt_Raffle_Database::get_raffle_numbers($raffle_id)
     ];
 
     wp_send_json_success($raffle);
@@ -724,7 +769,7 @@ function juzt_update_raffle_handler()
     // Actualizar galería
     if (!empty($raffle_data['gallery']) && is_array($raffle_data['gallery'])) {
         $gallery_ids = [];
-        
+
         foreach ($raffle_data['gallery'] as $image_url) {
             $attachment_id = attachment_url_to_postid($image_url['url']);
             if ($attachment_id) {

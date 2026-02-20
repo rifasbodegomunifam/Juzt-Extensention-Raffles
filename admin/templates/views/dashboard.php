@@ -4,7 +4,7 @@
  */
 ?>
 
-<div class="bg-white rounded-lg shadow-sm">
+<div class="bg-white rounded-lg shadow-sm relative">
     <!-- Header -->
     <div class="px-6 py-4 border-b border-gray-200">
         <div class="flex items-center justify-between">
@@ -94,12 +94,29 @@
         </svg>
         <p class="mt-2 text-gray-600">Cargando órdenes...</p>
     </div>
+
+    <div class="w-full bg-gray-800 px-6 py-3 border border-gray-500 rounded-lg mx-auto mb-8 sticky top-20 z-60 flex items-center space-x-4">
+        <button @click="applyOrderAction" type="button" class="bg-blue-600 text-white rounded-md cursor-pointer text-center px-6 py-3">Acciones masivas</button>
+        <select class="!px-4 !py-2" x-model="action_order">
+            <option value="">NONE</option>
+            <option value="remove">ELIMINAR</option>
+            <option value="approve">APROBAR</option>
+            <option value="reject">RECHAZAR</option>
+        </select>
+    </div>
     
     <!-- Tabla de órdenes -->
     <div x-show="!loading" class="overflow-x-auto">
         <table class="w-full">
             <thead class="border-b border-gray-200 bg-gray-50">
                 <tr>
+                    <th class="px-6 py-3">
+                        <input 
+                            type="checkbox" 
+                            @change="toggleSelectAll($event)"
+                            :checked="selectedOrders.length === filteredOrders.length && filteredOrders.length > 0"
+                        >
+                    </th>
                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Orden</th>
                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Cliente</th>
                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Rifa</th>
@@ -114,6 +131,7 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 <template x-for="order in filteredOrders" :key="order.id">
                     <tr class="transition-colors hover:bg-gray-50">
+                        <td class="px-6 py-3"><input x-model="selectedOrders" :value="order.id" type="checkbox"></td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900" x-text="order.order_number"></div>
                             <div class="text-xs text-gray-500">#<span x-text="order.id"></span></div>

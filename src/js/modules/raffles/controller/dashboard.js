@@ -2,6 +2,8 @@
  * Dashboard Controller
  */
 
+import { showToast } from "../../../utils/toast";
+
 class DashboardController {
     constructor(orderModel) {
         this.orderModel = orderModel;
@@ -12,6 +14,8 @@ class DashboardController {
         
         return {
             orders: [],
+            action_order: "",
+            selectedOrders: [],
             loading: false,
             filters: {
                 status: '',
@@ -28,6 +32,45 @@ class DashboardController {
                         this.loadOrders();
                     }
                 });
+            },
+
+            async applyOrderAction(event){
+                event.preventDefault();
+                if( this.action_order.trim().length === 0 ){
+                    showToast("Por favor, selecciona una acción", "error");
+                    return false;
+                }
+
+                if( this.selectedOrders.length === 0 ){
+                    showToast("Por favor, selecciona al menos una orden", "error");
+                    return false;
+                }
+                
+                this.loading = true;
+                
+                try {
+                    const response = await orderModel.masive(this.selectedOrders, this.action_order);
+                    const message = response?.message || "Acción aplicada correctamente";
+                    showToast(message, "success");
+                    this.selectedOrders = [];
+                    this.loadOrders();
+
+                    console.log("res", response);
+                } catch (error){
+                    this.selectedOrders = [];
+                    showToast("Error aplicando la acción masiva", "error");
+                    console.error("❌ Error masive", error);
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            toggleSelectAll(event) {
+                if (event.target.checked) {
+                    this.selectedOrders = this.filteredOrders.map(o => o.id);
+                } else {
+                    this.selectedOrders = [];
+                }
             },
             
             async loadOrders() {

@@ -18,6 +18,10 @@ return [
             "name" => "Metodo de pago",
             "description" => "Registre un metodo de pago aquí",
             "settings" => [
+                "logo_bank" => [
+                    "type" => "file",
+                    "label" => "Imagen del logo del banco"
+                ],
                 "account_bank" => [
                     "type" => "text",
                     "label" => "Titulo",

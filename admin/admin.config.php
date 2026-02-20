@@ -1,5 +1,6 @@
 <?php
 
+require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH . "/functions/db.functions.php";
 require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH . "/functions/database.functions.php";
 require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH . "/functions/ajax.functions.php";
 require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH . "/functions/raffle.functions.php";

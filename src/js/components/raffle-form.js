@@ -8,6 +8,7 @@ class RaffleForm extends LitElement {
 
     static properties = {
         payments: { type: Array },
+        selectedPaymentIndex: { type: Number },
         raffle: { type: Number },
         price: { type: Number },
         rateexchange: { type: String },
@@ -22,14 +23,10 @@ class RaffleForm extends LitElement {
 
     static styles = [css`${unsafeCSS(filecss)}`];
 
-    // ESTO DESACTIVA EL SHADOW DOM
-    /*createRenderRoot() {
-        return this; // Usa Light DOM en lugar de Shadow DOM
-    }*/
-
     constructor() {
         super();
         this.payments = [];
+        this.selectedPaymentIndex = null;
         this.raffle = null;
         this.rateexchange = '{}';
         this.rates = {};
@@ -48,6 +45,19 @@ class RaffleForm extends LitElement {
 
     }
 
+    togglePayment(index) {
+        // ✅ Si ya está abierto, cerrar; si no, abrir
+        if (this.selectedPaymentIndex === index) {
+            this.selectedPaymentIndex = null; // Cerrar
+        } else {
+            this.selectedPaymentIndex = index; // Abrir este, cerrar los demás
+        }
+    }
+
+    isPaymentOpen(index) {
+        return this.openPayments.has(index);
+    }
+
     connectedCallback() {
         super.connectedCallback();
 
@@ -61,12 +71,9 @@ class RaffleForm extends LitElement {
             }
         }
 
-        console.log("payments:", this.payments);
-
         window.addEventListener('raffle-countdown:ready', (event) => {
             this.showForm = !event.detail.status;
             this.loading = false;
-            console.log("Aqui");
         });
 
         if (this.showone == "paused") {
@@ -75,8 +82,6 @@ class RaffleForm extends LitElement {
         }
 
         this.loading = false;
-
-        console.log('Rates disponibles:', this.rates, this.rateexchange, this.loading);
     }
 
     onCopy(value) {
@@ -125,7 +130,6 @@ class RaffleForm extends LitElement {
         if (changedProperties.has('rateexchange')) {
             try {
                 this.rates = JSON.parse(this.rateexchange);
-                console.log('Rates parseadas:', this.rates, this.rateexchange);
                 this.updateTotal();
             } catch (e) {
                 console.error('Error parseando rates:', e);
@@ -503,48 +507,64 @@ class RaffleForm extends LitElement {
                     </h2>
                     
                     <p class="text-lg text-gray-300 mb-2">Realiza tu transferencia a:</p>
+                    
+                    <div class="flex flex-wrap gap-1.5 md:gap-3 mb-8">
+                    ${this.payments.map((item, index) => html`
+                        <button @click="${() => this.togglePayment(index)}" type="button" class="w-[50px] bg-white h-[50px] rounded-sm border border-red-600 cursor-pointer transition-all scale-100 hover:scale-110">
+                            ${this.selectedPaymentIndex === index ? html `<lucide-icon class="text-red-600 text-2xl" name="x" size="32"></lucide-icon>` : html `<img
+                                class="w-full h-full object-cover"
+                                loading="lazy"
+                                src="${item.settings.logo_bank}"
+                                srcset="${item.settings.logo_bank_src}"
+                                alt="${item.settings.account_bank}"
+                                aria-labelby="Button for pyment method using ${item.settings.account_bank}"
+                            />`}
+                            
+                        </button>
+                    ` )}
+                    </div>
 
-                    ${this.payments.map((item) => html`
-
-                        <div class="mb-4 p-4 bg-[#0f0f0f] border border-gray-700 rounded-lg">
-                            <div class="space-y-1 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-400">Banco:</span>
-                                    <span class="text-white font-semibold">${item.settings.account_bank}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-400">Tipo:</span>
-                                    <div class="flex justify-end lg:justify-between! gap-x-2.5 flex-wrap">
-                                        <span class="text-white font-semibold">${item.settings.account_type}</span>
-                                        <button @click=${() => this.onCopy(item.settings.account_type)} type="button" class="flex gap-1 items-center cursor-pointer">
-                                            <lucide-icon name="copy" size="16"></lucide-icon>
-                                            <span>Copiar</span>
-                                        </button>
+                    ${this.payments.map((item, index) => html`
+                        ${this.selectedPaymentIndex == index ? html `
+                            <div class="mb-4 p-4 bg-[#0f0f0f] border border-gray-700 rounded-lg">
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Banco:</span>
+                                        <span class="text-white font-semibold">${item.settings.account_bank}</span>
                                     </div>
-                                </div>
-                                <div class="flex justify-between gap-2.5 items-center">
-                                    <span class="text-gray-400">Cuenta:</span>
-                                    <div class="flex justify-end lg:justify-between! gap-x-2.5 flex-wrap">
-                                        <span class="text-white font-semibold">${item.settings.account_number}</span>
-                                        <button @click=${() => this.onCopy(item.settings.account_number)} type="button" class="flex gap-1 items-center cursor-pointer">
-                                            <lucide-icon name="copy" size="16"></lucide-icon>
-                                            <span>Copiar</span>
-                                        </button>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Tipo:</span>
+                                        <div class="flex justify-end lg:justify-between! gap-x-2.5 flex-wrap">
+                                            <span class="text-white font-semibold">${item.settings.account_type}</span>
+                                            <button @click=${() => this.onCopy(item.settings.account_type)} type="button" class="flex gap-1 items-center cursor-pointer">
+                                                <lucide-icon name="copy" size="16"></lucide-icon>
+                                                <span>Copiar</span>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-400">Titular:</span>
-                                    <div class="flex justify-end lg:justify-between! gap-x-2.5 flex-wrap">
-                                        <span class="text-white font-semibold">${item.settings.account_name}</span>
-                                        <button @click=${() => this.onCopy(item.settings.account_name)} type="button" class="flex gap-1 items-center cursor-pointer">
-                                            <lucide-icon name="copy" size="16"></lucide-icon>
-                                            <span>Copiar</span>
-                                        </button>
+                                    <div class="flex justify-between gap-2.5 items-center">
+                                        <span class="text-gray-400">Cuenta:</span>
+                                        <div class="flex justify-end lg:justify-between! gap-x-2.5 flex-wrap">
+                                            <span class="text-white font-semibold">${item.settings.account_number}</span>
+                                            <button @click=${() => this.onCopy(item.settings.account_number)} type="button" class="flex gap-1 items-center cursor-pointer">
+                                                <lucide-icon name="copy" size="16"></lucide-icon>
+                                                <span>Copiar</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Titular:</span>
+                                        <div class="flex justify-end lg:justify-between! gap-x-2.5 flex-wrap">
+                                            <span class="text-white font-semibold">${item.settings.account_name}</span>
+                                            <button @click=${() => this.onCopy(item.settings.account_name)} type="button" class="flex gap-1 items-center cursor-pointer">
+                                                <lucide-icon name="copy" size="16"></lucide-icon>
+                                                <span>Copiar</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
+                        ` : ''}
                     `)}
 
                     <div>

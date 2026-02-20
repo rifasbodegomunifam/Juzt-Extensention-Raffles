@@ -269,7 +269,7 @@ class Juzt_Raffle_Database
 
         if ($order) {
             $order['numbers'] = $this->get_order_numbers($order['id']);
-            $order['raffle']  = $this->get_raffle($order['raffle_id']);
+            $order['raffle'] = $this->get_raffle($order['raffle_id']);
         }
 
         return $order;
@@ -814,6 +814,69 @@ class Juzt_Raffle_Database
         );
     }
 
+    public static function get_raffle_numbers($raffle_id)
+    {
+        global $wpdb;
+
+        $total_numbers = intval(get_post_meta($raffle_id, '_raffle_ticket_limit', true));
+
+
+        if ($total_numbers <= 0) {
+            $total_numbers = 100;
+        }
+
+        $table_tickets = $wpdb->prefix . 'raffle_numbers';
+
+        $query = $wpdb->prepare(
+            "SELECT number 
+         FROM {$table_tickets} 
+         WHERE raffle_id = %d
+         ORDER BY number ASC",
+            $raffle_id
+        );
+
+        $results = $wpdb->get_results($query);
+
+        // Números generados
+        $generated = [];
+        foreach ($results as $row) {
+            $generated[] = intval($row->number);
+        }
+
+        // Números de 0 a (total_numbers - 1)
+        $all_numbers = range(0, $total_numbers - 1);
+        $available = array_values(array_diff($all_numbers, $generated));
+
+        // ✅ Calcular dígitos necesarios (1000 → 4 dígitos, 100 → 3 dígitos)
+        $digits = strlen((string) ($total_numbers - 1));
+
+        // ✅ Formatear números con ceros a la izquierda
+        $generated_formatted = array_map(function ($num) use ($digits) {
+            return str_pad($num, $digits, '0', STR_PAD_LEFT);
+        }, $generated);
+
+        $available_formatted = array_map(function ($num) use ($digits) {
+            return str_pad($num, $digits, '0', STR_PAD_LEFT);
+        }, $available);
+
+        // ✅ NUEVO: Merge de todos los números con estado
+        $numbers_merged = [];
+        foreach ($all_numbers as $num) {
+            $numbers_merged[] = [
+                'number' => str_pad($num, $digits, '0', STR_PAD_LEFT),
+                'assigned' => in_array($num, $generated)
+            ];
+        }
+
+        return [
+            'sold_count' => count($generated),
+            'available_count' => count($available),
+            'sold_percentage' => ($total_numbers > 0) ? round((count($generated) / $total_numbers) * 100, 2) : 0,
+            'number_format' => $digits,
+            'tickets' => $numbers_merged
+        ];
+    }
+
     public function get_raffle($raffle_id)
     {
         $post = get_post($raffle_id);
@@ -842,9 +905,11 @@ class Juzt_Raffle_Database
             'ticket_limit' => intval(get_post_meta($raffle_id, '_raffle_ticket_limit', true)),
             'status' => get_post_meta($raffle_id, '_raffle_status', true) ?: 'active',
             'date' => get_post_meta($raffle_id, '_raffle_date', true) ?: null,
-            'prizes' => $prizes,
+            'prizes' => $prizes
         ];
 
         return $raffle;
     }
+
+    
 }

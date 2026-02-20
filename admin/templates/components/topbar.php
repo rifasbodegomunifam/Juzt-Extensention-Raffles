@@ -46,7 +46,7 @@
             
             <!-- Título Centro -->
             <div class="absolute left-1/2 transform -translate-x-1/2 hidden lg:block!">
-                <h1 class="text-2xl font-bold tracking-tight text-gray-800">
+                <h1 class="!text-5xl font-bold tracking-tight text-gray-800">
                     🎟️ JUZT RAFFLE
                 </h1>
             </div>

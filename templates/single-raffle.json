@@ -18,7 +18,8 @@
                         "account_bank": "Binance",
                         "account_number": "nenegocho@gmail.com ",
                         "account_type": "Online",
-                        "account_name": "Jesus Cuauro Araque"
+                        "account_name": "Jesus Cuauro Araque",
+                        "logo_bank": "74"
                     }
                 },
                 {
@@ -27,7 +28,8 @@
                         "account_bank": "Zelle",
                         "account_number": "bodegomunifam.rc@gmail.com ",
                         "account_type": "Online",
-                        "account_name": "Jesus Cuauro Araque"
+                        "account_name": "Jesus Cuauro Araque",
+                        "logo_bank": "75"
                     }
                 },
                 {
@@ -36,7 +38,8 @@
                         "account_bank": "Bancolombia",
                         "account_number": "94400004807",
                         "account_type": "Ahorros",
-                        "account_name": "Carmen Araque Zambrano "
+                        "account_name": "Carmen Araque Zambrano ",
+                        "logo_bank": "76"
                     }
                 }
             ]

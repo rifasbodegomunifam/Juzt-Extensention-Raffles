@@ -69,7 +69,7 @@
                     </label>
                     <textarea x-model="raffle.content" rows="4"
                         class="block px-4 py-2 mt-1 w-full rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="DD-MM-YYYY HH:MM:SS"></textarea>
+                        placeholder="Una rifa genial!"></textarea>
                 </div>
 
                 <!-- Grid: Precio y Boletos -->
@@ -252,8 +252,8 @@
                                     <div class="mt-2">
                                         <!-- Preview de imagen -->
                                         <div x-show="prize.image && prize.imageUrl" class="inline-block relative">
-                                            <img :src="prize.imageUrl"
-                                                class="object-cover w-32 h-32 rounded-lg" :alt="prize.title">
+                                            <img :src="prize.imageUrl" class="object-cover w-32 h-32 rounded-lg"
+                                                :alt="prize.title">
                                             <button type="button" @click="prize.image = null; prize.imageUrl = ''"
                                                 class="absolute top-1 right-1 p-1 text-white bg-red-600 rounded-full hover:bg-red-700">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -286,6 +286,199 @@
                                     <input type="text" x-model="prize.detail"
                                         class="block px-4 py-2 mt-1 w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         placeholder="Ej: Incluye funda y audífonos">
+                                </div>
+
+                                <button x-show="prize.winner_number != null" class="rounded-md py-2 px-0 bg-red-600 text-white hover:bg-red-500 transition-all text-center w-full cursor-pointer" type="button" @click="prize.winner_number = null">Quitar numero ganador</button>
+
+                                <!-- En la sección de cada premio, reemplazar el selector de números -->
+                                <div x-data="{
+    searchNumber: '',
+    currentPage: 1,
+    perPage: 50,
+    
+    get filteredTickets() {
+        if (!this.searchNumber) return raffle.tickets;
+        return raffle.tickets.filter(ticket => 
+            ticket.number.includes(this.searchNumber)
+        );
+    },
+    
+    get totalPages() {
+        return Math.ceil(this.filteredTickets?.length / this.perPage);
+    },
+    
+    get paginatedTickets() {
+        const start = (this.currentPage - 1) * this.perPage;
+        const end = start + this.perPage;
+        return this.filteredTickets?.slice(start, end);
+    },
+    
+    get pageNumbers() {
+        const pages = [];
+        const maxVisible = 5;
+        let startPage = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+        let endPage = Math.min(this.totalPages, startPage + maxVisible - 1);
+        
+        if (endPage - startPage < maxVisible - 1) {
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(i);
+        }
+        return pages;
+    },
+    
+    goToPage(page) {
+        if (page >= 1 && page <= this.totalPages) {
+            this.currentPage = page;
+        }
+    },
+    
+    resetPagination() {
+        this.currentPage = 1;
+    }
+}">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Seleccionar número ganador de este premio
+                                    </label>
+
+                                    <!-- Buscador -->
+                                    <div class="mb-4">
+                                        <div class="relative">
+                                            <input type="text" x-model="searchNumber" @input="resetPagination()"
+                                                placeholder="Buscar número..."
+                                                class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                            
+                                        </div>
+
+                                        <!-- Contador de resultados -->
+                                        <p class="mt-2 text-sm text-gray-600">
+                                            <span x-show="!searchNumber">
+                                                Mostrando <span x-text="paginatedTickets.length"></span> de <span
+                                                    x-text="raffle.tickets.length"></span> números vendidos
+                                            </span>
+                                            <span x-show="searchNumber">
+                                                Encontrados: <span x-text="filteredTickets.length"></span> números
+                                            </span>
+                                        </p>
+                                    </div>
+
+                                    <!-- Grid de números -->
+                                    <div
+                                        class="overflow-auto max-h-96 w-full bg-gray-50 p-3 rounded-lg border border-gray-200">
+
+                                        <!-- Mensaje cuando no hay resultados -->
+                                        <div x-show="filteredTickets.length === 0" class="text-center py-8">
+                                            <svg class="mx-auto w-12 h-12 text-gray-400" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <p class="mt-2 text-gray-600">No se encontraron números</p>
+                                            <button type="button" @click="searchNumber = ''"
+                                                class="mt-2 text-sm text-blue-600 hover:text-blue-700">
+                                                Limpiar búsqueda
+                                            </button>
+                                        </div>
+
+                                        <!-- Grid de números paginados -->
+                                        <div x-show="paginatedTickets.length > 0"
+                                            class="grid gap-2 grid-cols-5 md:grid-cols-10">
+                                            <template x-for="(ticket, index) in paginatedTickets" :key="ticket.number">
+                                                <label
+                                                    class="flex flex-col items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition-all"
+                                                    :class="{
+                        'border-blue-600 bg-blue-100 shadow-md': prize.winner_number === ticket.number,
+                        'border-gray-300 bg-white hover:border-blue-400 hover:bg-blue-50': prize.winner_number !== ticket.number
+                    }">
+                                                    <input type="radio" :name="'winner_number_' + index"
+                                                        :value="ticket.number" x-model="prize.winner_number"
+                                                        class="sr-only" />
+
+                                                    <!-- Checkmark cuando está seleccionado -->
+                                                    <svg x-show="prize.winner_number === ticket.number"
+                                                        class="absolute top-1 right-1 w-4 h-4 text-blue-600"
+                                                        fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd"
+                                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+
+                                                    <span x-text="ticket.number" class="font-mono font-bold text-sm"
+                                                        :class="prize.winner_number === ticket.number ? 'text-blue-700' : 'text-gray-700'"></span>
+                                                </label>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Paginación -->
+                                    <div x-show="totalPages > 1 && filteredTickets.length > 0"
+                                        class="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
+
+                                        <!-- Botón anterior -->
+                                        <button type="button" @click="goToPage(currentPage - 1)"
+                                            :disabled="currentPage === 1"
+                                            class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Números de página -->
+                                        <div class="flex gap-1">
+                                            <!-- Primera página -->
+                                            <button x-show="pageNumbers[0] > 1" type="button" @click="goToPage(1)"
+                                                class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                                1
+                                            </button>
+
+                                            <span x-show="pageNumbers[0] > 2" class="px-2 py-2 text-gray-500">...</span>
+
+                                            <!-- Páginas visibles -->
+                                            <template x-for="page in pageNumbers" :key="page">
+                                                <button type="button" @click="goToPage(page)"
+                                                    class="px-3 py-2 text-sm font-medium rounded-lg" :class="{
+                        'bg-blue-600 text-white': currentPage === page,
+                        'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50': currentPage !== page
+                    }" x-text="page"></button>
+                                            </template>
+
+                                            <span x-show="pageNumbers[pageNumbers.length - 1] < totalPages - 1"
+                                                class="px-2 py-2 text-gray-500">...</span>
+
+                                            <!-- Última página -->
+                                            <button x-show="pageNumbers[pageNumbers.length - 1] < totalPages"
+                                                type="button" @click="goToPage(totalPages)"
+                                                class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                                                x-text="totalPages"></button>
+                                        </div>
+
+                                        <!-- Botón siguiente -->
+                                        <button type="button" @click="goToPage(currentPage + 1)"
+                                            :disabled="currentPage === totalPages"
+                                            class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Info de paginación -->
+                                    <p x-show="totalPages > 1" class="mt-2 text-xs text-center text-gray-500">
+                                        Página <span x-text="currentPage"></span> de <span x-text="totalPages"></span>
+                                    </p>
+
+                                    <!-- Número seleccionado -->
+                                    <div x-show="prize.winner_number"
+                                        class="mt-4 p-3 bg-green-50 border border-green-500 rounded-lg">
+                                        <p class="text-sm text-green-700">
+                                            Número ganador: <span x-text="prize.winner_number"
+                                                class="font-mono font-bold text-lg"></span>
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 

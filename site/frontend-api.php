@@ -37,18 +37,28 @@ class Frontend_API
 
         register_rest_route(
             $this->namespace,
+            '/save-order-test',
+            [
+                'methods' => 'POST',
+                'callback' => [$this, 'register_order'],
+                'permission_callback' => '__return_true'
+            ]
+        );
+
+        register_rest_route(
+            $this->namespace,
             '/test-rest',
             [
                 'methods' => 'GET',
                 'callback' => [$this, 'test_rest'],
-                'permission_callback' => [$this, 'check_public_nonce']
+                'permission_callback' => '__return_true'
             ]
         );
     }
 
     public function register_order($request)
     {
-        
+
         $order_data = array(
             'raffle_id' => $request->get_param('raffle_id'),
             'customer_name' => $request->get_param('customer_name'),
@@ -106,6 +116,17 @@ class Frontend_API
                 }
 
                 $raffle = Juzt_Raffle_Database::get_instance()->get_raffle($order_data['raffle_id']);
+
+                $sendEmail = $request->get_param('send_email');
+
+                error_log("send email" . json_encode($sendEmail));
+
+                if ($sendEmail == "false" || $sendEmail == null) {
+                    return rest_ensure_response(array(
+                        'success' => true,
+                        'order' => $result['order_number']
+                    ));
+                }
 
                 $email = EmailHandler::generate_email('order-created', [
                     "order_id" => $result["order_id"],
@@ -166,7 +187,13 @@ class Frontend_API
 
     public function test_rest($request)
     {
-        return "Hello loco you";
+        $send = EmailHandler::send(
+            "rifaselbodegomunifam@gmail.com",
+            "Test emails",
+            'Emails test send'
+        );
+
+        return $send;
     }
 
     public function check_permission()

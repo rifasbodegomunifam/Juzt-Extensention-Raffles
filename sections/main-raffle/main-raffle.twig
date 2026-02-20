@@ -11,6 +11,26 @@
 {% set share_description = "Sorteo de " ~ post.title ~ " - No te lo pierdas" %}
 {% set share_uri = post.link %}
 
+{% set payments_transformed = [] %}
+
+{% for payment in section.blocks %}
+    {% set payment_copy = payment %}
+    
+    {# Si logo_bank es numérico, obtener URL #}
+    {% if payment.settings.logo_bank is not empty %}
+        {% set logo_url = payment.settings.logo_bank | attachment_url %}
+		{% set logo_srcset = payment.settings.logo_bank | attachment_srcset %}
+        {% set payment_copy = payment_copy | merge({
+            settings: payment.settings | merge({
+                logo_bank: logo_url,
+				logo_bank_srcset: logo_srcset,
+				open: false
+            })
+        }) %}
+    {% endif %}
+    
+    {% set payments_transformed = payments_transformed | merge([payment_copy]) %}
+{% endfor %}
 
 <style>
 	.custom-scrollbar::-webkit-scrollbar {
@@ -72,7 +92,7 @@
 						price: raffle_price, 
 						cop: raffle_price_cop, 
 						ves: raffle_price_ves,
-						payments: section.blocks,
+						payments: payments_transformed,
 						show_one: raffle_show_one
 					}) }}
 				</div>
@@ -139,7 +159,7 @@
 								price: raffle_price, 
 								cop: raffle_price_cop, 
 								ves: raffle_price_ves,
-								payments: section.blocks,
+								payments: payments_transformed,
 								show_one: raffle_show_one
 							}) }}
 						</div>

@@ -74,6 +74,34 @@ class OrderModel {
         }
     }
 
+    async masive(items, action){
+        const formData = new FormData();
+        formData.append('action', 'juzt_mavise_order');
+        formData.append('nonce', this.nonce);
+        formData.append('todo', action);
+        formData.append('data', JSON.stringify(items));
+
+        try {
+            const response = await fetch(this.endpoint, {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            return {
+                success: data.success,
+                message: data.data?.message || data.data || 'Error desconocido'
+            };
+        } catch (error) {
+            console.error('Error al rechazar orden:', error);
+            return {
+                success: false,
+                message: 'Error de red al rechazar orden'
+            };
+        }
+    }
+
     /**
      * Aprobar orden y asignar números
      */

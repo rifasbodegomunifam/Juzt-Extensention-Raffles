@@ -76,6 +76,7 @@
         <table class="w-full">
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
+                    
                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Rifa</th>
                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Precio</th>
                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Boletos</th>
@@ -88,6 +89,7 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 <template x-for="raffle in filteredRaffles" :key="raffle.id">
                     <tr class="transition-colors hover:bg-gray-50">
+                        
                         <td class="px-6 py-4">
                             <div class="flex items-center">
                                 <img 

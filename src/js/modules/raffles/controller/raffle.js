@@ -127,16 +127,17 @@ class RaffleController {
       // Estado inicial del formulario
       raffleInitialState: {
         id: null,
+        tickets: [],
         buy_from_one: 'paused',
         title: '',
         date: '',
         content: '',
         price: 0,
         allow_installments: false,
-        ticket_limit: 100,
+        ticket_limit: 1000,
         gallery: [],
         prizes: [
-          { title: '', description: '', image: null, imageUrl: '', detail: '' }
+          { title: '', description: '', image: null, imageUrl: '', detail: '', winner_number: null }
         ],
         status: 'active',
 
@@ -145,18 +146,20 @@ class RaffleController {
       // Datos del formulario
       raffle: {
         id: null,
+        tickets: [],
         buy_from_one: 'paused',
         title: '',
         date: '',
         content: '',
         price: 0,
         allow_installments: false,
-        ticket_limit: 100,
+        ticket_limit: 1000,
         gallery: [],
         prizes: [
-          { title: '', description: '', image: null, imageUrl: '', detail: '' }
+          { title: '', description: '', image: null, imageUrl: '', detail: '', winner_number: null }
         ],
-        status: 'active'
+        status: 'active',
+
       },
 
       loading: false,
@@ -194,18 +197,20 @@ class RaffleController {
       resetForm() {
         this.raffle = {
           id: null,
-          title: '',
+          tickets: [],
           buy_from_one: 'paused',
+          title: '',
           date: '',
           content: '',
           price: 0,
           allow_installments: false,
-          ticket_limit: 100,
-          gallery: [], // Array vacío
+          ticket_limit: 1000,
+          gallery: [],
           prizes: [
-            { title: '', description: '', image: null, imageUrl: '', detail: '' }
+            { title: '', description: '', image: null, imageUrl: '', detail: '', winner_number: null }
           ],
-          status: 'active'
+          status: 'active',
+
         };
       },
 
@@ -226,6 +231,7 @@ class RaffleController {
             this.raffle.allow_installments = Boolean(data.allow_installments);
             this.raffle.ticket_limit = parseInt(data.ticket_limit) || 100;
             this.raffle.status = data.status || 'active';
+            this.raffle.tickets = data.numbers.tickets;
 
             // ✅ Manejar galería (compatibilidad con formato antiguo y nuevo)
             this.raffle.gallery = await this.processGallery(data.gallery);
@@ -368,6 +374,12 @@ class RaffleController {
       openMediaLibrary(type = 'single', callback) {
         if (typeof wp === 'undefined' || !wp.media) {
           alert('Media Library no disponible');
+          return;
+        }
+
+        if (typeof _ === 'undefined') {
+          console.error('❌ Underscore no está disponible');
+          alert('Error: Underscore no está cargado. Recarga la página.');
           return;
         }
 
