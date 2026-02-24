@@ -19,17 +19,17 @@
                         "account_number": "nenegocho@gmail.com ",
                         "account_type": "Online",
                         "account_name": "Jesus Cuauro Araque",
-                        "logo_bank": "74"
+                        "logo_bank": "76"
                     }
                 },
                 {
                     "type": "pyment",
                     "settings": {
                         "account_bank": "Zelle",
-                        "account_number": "bodegomunifam.rc@gmail.com ",
+                        "account_number": "Bodegomunifam.rc@gmail.com",
                         "account_type": "Online",
-                        "account_name": "Jesus Cuauro Araque",
-                        "logo_bank": "75"
+                        "account_name": "Ronyker  Cuauro Araque",
+                        "logo_bank": "78"
                     }
                 },
                 {
@@ -39,7 +39,47 @@
                         "account_number": "94400004807",
                         "account_type": "Ahorros",
                         "account_name": "Carmen Araque Zambrano ",
-                        "logo_bank": "76"
+                        "logo_bank": "77"
+                    }
+                },
+                {
+                    "type": "pyment",
+                    "settings": {
+                        "logo_bank": "82",
+                        "account_bank": "Paypal",
+                        "account_number": "Ronykercuauro@gmail.com",
+                        "account_type": "Online",
+                        "account_name": "Ronyker cuauro Araque "
+                    }
+                },
+                {
+                    "type": "pyment",
+                    "settings": {
+                        "logo_bank": "84",
+                        "account_bank": "Nequi",
+                        "account_number": "00000000",
+                        "account_type": "Online",
+                        "account_name": "Jesus"
+                    }
+                },
+                {
+                    "type": "pyment",
+                    "settings": {
+                        "logo_bank": "85",
+                        "account_bank": "Mercado Pago",
+                        "account_number": "00000000",
+                        "account_type": "Online",
+                        "account_name": "Jesus"
+                    }
+                },
+                {
+                    "type": "pyment",
+                    "settings": {
+                        "logo_bank": "86",
+                        "account_bank": "Zinli",
+                        "account_number": "1111111111111",
+                        "account_type": "Online",
+                        "account_name": "Jesus2323"
                     }
                 }
             ]
