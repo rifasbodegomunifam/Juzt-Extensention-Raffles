@@ -5,7 +5,7 @@
 {% set raffle_show_one = get_post_meta("_raffle_buy_from_one", post.id) %}
 {% set raffle_price_cop = exchange_api_convert(raffle_price, "usd", "cop") %}
 {% set raffle_price_ves = exchange_api_convert(raffle_price, "usd", "ves") %}
-
+{% set allow_installments = get_post_meta('_raffle_allow_installments', post.id) %}
 
 {% set share_title = "¡Participa en " ~ post.title ~ "!" %}
 {% set share_description = "Sorteo de " ~ post.title ~ " - No te lo pierdas" %}
@@ -85,6 +85,10 @@
 					{% endif %}
 				</div>
 
+				<header class="mb-6">
+					<h1 class="text-2xl lg:text-4xl text-center font-bold text-red-600">{{ post.title }}</h1>
+				</header>
+
 				<!-- Imagen del Producto -->
 				<div class="block lg:hidden">
 					{{ snippet('raffle-form', {
@@ -93,7 +97,8 @@
 						cop: raffle_price_cop, 
 						ves: raffle_price_ves,
 						payments: payments_transformed,
-						show_one: raffle_show_one
+						show_one: raffle_show_one,
+						allow_installments: allow_installments
 					}) }}
 				</div>
 
@@ -102,11 +107,11 @@
 
 					<!-- Precio -->
 					<div class="p-4 mb-6 border bg-linear-to-br from-red-600/20 to-red-600/5 border-red-600/30 rounded-xl">
-						<div class="mb-1 text-sm text-white text-center font-bold">Precio por boleto</div>
-						<div class="mb-1 text-md md:text-2xl font-bold text-white text-center">
-							{{ format_currency(raffle_price, 'USD') }} | 
-							{{ format_currency(raffle_price_cop.conversion_result, 'COP') }} | 
-							{{ format_currency(raffle_price_ves.conversion_result, 'VES') }}
+						<div class="mb-3 text-lg text-white text-center">Precio por boleto</div>
+						<div class="mb-1 text-md md:text-2xl font-bold text-white text-center flex gap-1 items-center justify-center">
+							<span class="">{{ format_currency(raffle_price, 'USD') }}</span> | 
+							{{ raffle_price_cop.conversion_result == 0 ? '<span class="text-xs text-center w-30 block items-center">Conversion no disponible</span>' | raw : format_currency(raffle_price_cop.conversion_result, 'COP') }} | 
+							{{ raffle_price_ves.conversion_result == 0 ? '<span class="text-xs text-center w-30 block items-center">Conversion no disponible</span>' | raw : format_currency(raffle_price_ves.conversion_result, 'VES') }}
 						</div>
 					</div>
 
@@ -148,10 +153,8 @@
 			<div class="sticky lg:col-span-2 rounded-xl">
 				<div class="">
 					<div class="bg-[#1a1a1a] rounded-2xl p-4 md:p-6 border border-gray-800">
-
-						<h1 class="mb-1 text-2xl font-bold text-white">{{ post.title }}</h1>
 						<!-- Números -->
-						<h3 class="mb-3 font-semibold text-white"> Completa tu suerte!</h3>
+						<h3 class="mb-3 text-center text-2xl font-semibold text-white"> Completa tu suerte!</h3>
 
 						<div class="hidden lg:block">
 							{{ snippet('raffle-form', {

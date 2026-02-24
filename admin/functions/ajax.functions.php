@@ -10,6 +10,14 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+add_action('wp_ajax_test_missing_payment', function(){
+    $order_id = isset($_GET['order_id']) ? intval($_GET['order_id']) : 0;
+    wp_send_json([
+        'order_id' => $order_id,
+        'missing' => Juzt_Raffle_Database::get_instance()->validate_missing_payments($order_id)
+    ]);
+});
+
 add_action('wp_ajax_juzt_mavise_order', 'juzt_masive_actions');
 function juzt_masive_actions()
 {
@@ -440,6 +448,7 @@ function juzt_verify_payment_handler()
 
     $order_id = isset($_POST['order_id']) ? intval($_POST['order_id']) : 0;
     $installment_number = isset($_POST['installment_number']) ? intval($_POST['installment_number']) : 0;
+    $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : null;
     $notes = isset($_POST['notes']) ? sanitize_textarea_field($_POST['notes']) : '';
 
     if (!$order_id || !$installment_number) {
@@ -450,11 +459,14 @@ function juzt_verify_payment_handler()
     $db = Juzt_Raffle_Database::get_instance();
     $user_id = get_current_user_id();
 
-    $result = $db->verify_payment($order_id, $installment_number, $user_id, $notes);
+    $result = $db->verify_payment($order_id, $installment_number, $user_id, $notes, $amount);
+
+    $missing_payments = $db->validate_missing_payments($order_id);
 
     if ($result) {
         wp_send_json_success([
-            'message' => "Pago de cuota #{$installment_number} verificado exitosamente"
+            'message' => "Pago de cuota #{$installment_number} verificado exitosamente",
+            'missing_payments' => $missing_payments
         ]);
 
 

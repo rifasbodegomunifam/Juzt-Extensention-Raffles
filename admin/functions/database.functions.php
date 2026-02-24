@@ -252,6 +252,7 @@ class Juzt_Raffle_Database
             $order['numbers'] = $this->get_order_numbers($order_id);
             $order['payments'] = $this->get_order_payments($order_id); // ✅ Agregar pagos
             $order['history'] = $this->get_order_history($order_id); // ✅ Agregar historial
+            $order['allow_multiples_payments'] = get_post_meta($order['raffle_id'], '_raffle_allow_installments', true) ? true : false; // ✅ Permitir múltiples pagos
         }
 
         return $order;
@@ -445,10 +446,23 @@ class Juzt_Raffle_Database
         return $updated !== false;
     }
 
+    public function validate_missing_payments($orderId){
+        $order_ammount = $this->get_order($orderId)['total_amount'];
+        $payments = $this->get_order_payments($orderId);
+        $total_paid = 0;
+        foreach($payments as $payment){
+            if($payment['status'] === 'verified'){
+                $total_paid += floatval($payment['amount']);
+            }
+        }
+
+        return $order_ammount - $total_paid;
+    }
+
     /**
      * Verificar pago (admin)
      */
-    public function verify_payment($order_id, $installment_number, $user_id, $notes = '')
+    public function verify_payment($order_id, $installment_number, $user_id, $notes = '', $amount = null)
     {
         global $wpdb;
         $table = self::get_payments_table();
@@ -457,6 +471,7 @@ class Juzt_Raffle_Database
             $table,
             array(
                 'status' => 'verified',
+                'amount' => $amount,
                 'verified_by' => $user_id,
                 'verified_at' => current_time('mysql'),
                 'notes' => sanitize_textarea_field($notes)
@@ -465,7 +480,7 @@ class Juzt_Raffle_Database
                 'order_id' => $order_id,
                 'installment_number' => $installment_number
             ),
-            array('%s', '%d', '%s', '%s'),
+            array('%s', '%f', '%d', '%s', '%s'),
             array('%d', '%d')
         );
 

@@ -291,13 +291,22 @@ class OrderController {
             },
 
             async verifyPayment(installmentNumber) {
-                const notes = prompt('Notas (opcional):');
+                let notes = prompt('Notas (opcional):');
                 if (notes === null) return; // User cancelled
 
-                this.processing = true;
-                try {
-                    const result = await orderModel.verifyPayment(this.order.id, installmentNumber, notes);
+                let amount = null;
 
+                amount = prompt('Monto del pago:');
+                if (amount === null) return; // User cancelled
+                if (isNaN(amount) || parseFloat(amount) <= 0) {
+                    alert('Monto inválido');
+                    return;
+                }
+
+                this.processing = true;
+
+                try {
+                    const result = await orderModel.verifyPayment(this.order.id, installmentNumber, amount, notes);
                     if (result.success) {
                         alert(result.message);
                         await this.loadOrder(this.order.id);

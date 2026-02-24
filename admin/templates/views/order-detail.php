@@ -80,6 +80,8 @@
                 </div>
             </div>
 
+            <pre x-text="JSON.stringify(order, null, 2)" class="hidden p-4 mt-4 text-xs text-gray-500 bg-gray-100 rounded-lg overflow-x-auto"></pre>
+
             <!-- Pagos / Cuotas -->
             <div class="p-6 bg-white rounded-lg shadow-sm">
                 <h2 class="text-lg font-semibold text-gray-900">Pagos</h2>

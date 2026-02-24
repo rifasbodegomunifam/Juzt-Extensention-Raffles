@@ -7,6 +7,7 @@ import filecss from '../../../assets/css/index.css?inline';
 class RaffleForm extends LitElement {
 
     static properties = {
+        allowinstallments: { type: Boolean },
         payments: { type: Array },
         selectedPaymentIndex: { type: Number },
         raffle: { type: Number },
@@ -42,6 +43,7 @@ class RaffleForm extends LitElement {
         this.cta_text = "Confirmar Compra";
         this.showone = "paused";
         this.numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        this.allowinstallments = false;
 
     }
 
@@ -69,6 +71,10 @@ class RaffleForm extends LitElement {
                 console.error('Error parsing menu items:', e);
                 this.payments = [];
             }
+        }
+
+        if(typeof this.allowinstallments === 'string') {
+            this.allowinstallments = this.allowinstallments === 'true';
         }
 
         window.addEventListener('raffle-countdown:ready', (event) => {
@@ -319,16 +325,27 @@ class RaffleForm extends LitElement {
             'justify-center',
         ];
 
+        console.log("Price", this.totalRate);
+
         if ((this.showone === "paused" && this.quantity === 2) || (this.showone === 'active' && this.quantity == 1)) {
             decrementClass.push('pointer-none cursor-not-allowed');
         } else {
             decrementClass.push('cursor-pointer');
         }
 
+        const installmentText = this.allowinstallments ? html`
+        <div class="rounded-md p-6 flex flex-col gap-2 bg-red-600 mb-8">
+            <h6 class="text-center text-xl lg:text-2xl text-red-100! font-bold mb-1 lg:mb-4">¡Puedes pagar en cuotas!</h6>
+            <p class="text-center text-red-100!">Selecciona la cantidad de boletos que deseas comprar y te mostraremos el total a pagar en dólares, pesos colombianos y bolívares venezolanos.</p>
+        </div>
+        ` : html``;
+
         return html`
         <main class="w-full rounded-lg">
-            <h3 class="text-3xl text-center font-bold text-white mb-6">Ingresa tu información</h3>
-            
+            <h3 class="text-xl lg:text-3xl text-center font-bold text-white mb-6">Ingresa tu información</h3>
+
+            ${installmentText}
+
             <form @submit=${this.handleSubmit} class="space-y-6 flex flex-col">
             
                 <!-- Datos Personales -->
@@ -475,23 +492,29 @@ class RaffleForm extends LitElement {
                             <div class="flex justify-between items-center flex-col lg:flex-row!">
                                 <span class="text-gray-300 font-medium">Total a pagar:</span>
                                 <span class="text-md font-bold text-red-500">${new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(this.totalPrice)}</span>
+                                    style: 'currency',
+                                    currency: 'USD',
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                    }).format(this.totalPrice)}
+                                </span>
+                                
+                                ${this.totalPrice.cop > 0 ? html`
                                 <span class="text-md font-bold text-red-500">${new Intl.NumberFormat('es-CO', {
-            style: 'currency',
-            currency: 'COP',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(this.totalRate.cop)}</span>
-                                <span class="text-md font-bold text-red-500">${new Intl.NumberFormat('es-VE', {
-            style: 'currency',
-            currency: 'VES',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(this.totalRate.ves)}</span>
+                                    style: 'currency',
+                                    currency: 'COP',
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                    }).format(this.totalRate.cop)}
+                                </span>` : html`<span class="text-xs text-center w-20 block items-center">Conversion no disponible</span>`}
+                                
+                                ${this.totalPrice.ves > 0 ? html`<span class="text-md font-bold text-red-500">${new Intl.NumberFormat('es-VE', {
+                                    style: 'currency',
+                                    currency: 'VES',
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                    }).format(this.totalRate.ves)}
+                                </span>` : html`<span class="text-xs text-center w-20 block items-center">Conversion no disponible</span>`}
                             </div>
                         </div>
                     </div>

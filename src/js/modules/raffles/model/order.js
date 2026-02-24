@@ -167,12 +167,13 @@ class OrderModel {
     /**
      * Verificar pago de una cuota
      */
-    async verifyPayment(orderId, installmentNumber, notes = '') {
+    async verifyPayment(orderId, installmentNumber, amount=null, notes = '') {
         const formData = new FormData();
         formData.append('action', 'juzt_verify_payment');
         formData.append('nonce', this.nonce);
         formData.append('order_id', orderId);
         formData.append('installment_number', installmentNumber);
+        formData.append('amount', amount);
         formData.append('notes', notes);
 
         try {
