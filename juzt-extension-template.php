@@ -4,7 +4,7 @@
  * Plugin Name: Juzt Extension Template
  * Plugin URI: https://juztstack.com
  * Description: Template para crear extensiones de Juzt Studio Community.
- * Version: 2.8.1
+ * Version: 2.8.2
  * Author: JuztStack
  * License: MIT
  * Requires at least: 5.8
