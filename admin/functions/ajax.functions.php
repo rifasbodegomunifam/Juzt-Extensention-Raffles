@@ -1231,3 +1231,122 @@ function juzt_upload_payment_proof_admin_handler()
         wp_send_json_error(['message' => 'Error al guardar el comprobante']);
     }
 }
+
+//Payment methods
+
+add_action('wp_ajax_juzt_payment_methods', 'juzt_payment_methods_handler');
+
+function juzt_payment_methods_handler()
+{
+    check_ajax_referer('juzt_raffle_nonce', 'nonce');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(['message' => 'No tienes permisos']);
+        return;
+    }
+
+    require_once JUZT_EXTENSION_TEMPLATE_PLUGIN_ADMIN_PATH . '/functions/payment.methods.php';
+
+    // ✅ action_type viene en POST
+    $action = isset($_POST['action_type']) ? sanitize_text_field($_POST['action_type']) : '';
+
+    switch ($action) {
+        case 'add':
+            $name = isset($_POST['name']) ? sanitize_text_field($_POST['name']) : '';
+            $account = isset($_POST['account']) ? sanitize_text_field($_POST['account']) : '';
+            $bank = isset($_POST['bank']) ? sanitize_text_field($_POST['bank']) : '';
+            $image_id = isset($_POST['image_id']) ? intval($_POST['image_id']) : 0;
+            $type = isset($_POST['type']) ? sanitize_text_field($_POST['type']) : '';
+
+            // ✅ Validación
+            if (empty($name) || empty($account) || empty($bank) || !$image_id) {
+                wp_send_json_error(['message' => 'Todos los campos son obligatorios']);
+                return;
+            }
+
+            $manager = new Payment_Methods_Manager();
+            $result = $manager->create([
+                'name' => $name,
+                'account' => $account,
+                'bank' => $bank,
+                'image' => $image_id,
+                'type' => $type
+            ]);
+
+            if ($result) {
+                wp_send_json_success([
+                    'message' => 'Método agregado exitosamente',
+                    'data' => $result
+                ]);
+            } else {
+                wp_send_json_error(['message' => 'Error al agregar el método']);
+            }
+            
+            break; // ✅ IMPORTANTE!
+            
+        case 'delete':
+            $method_id = isset($_POST['method_id']) ? intval($_POST['method_id']) : 0;
+
+            if (!$method_id) {
+                wp_send_json_error(['message' => 'ID de método inválido']);
+                return;
+            }
+
+            $manager = new Payment_Methods_Manager();
+            $result = $manager->delete($method_id);
+
+            if ($result) {
+                wp_send_json_success(['message' => 'Método eliminado exitosamente']);
+            } else {
+                wp_send_json_error(['message' => 'Error al eliminar el método']);
+            }
+            
+            break; // ✅ IMPORTANTE!
+            
+        case 'list':
+            $manager = new Payment_Methods_Manager();
+            $methods = $manager->get_all();
+
+            wp_send_json_success(['methods' => $methods]);
+            
+            break; // ✅ IMPORTANTE!
+            
+        case 'update':
+            $name = isset($_POST['name']) ? sanitize_text_field($_POST['name']) : '';
+            $account = isset($_POST['account']) ? sanitize_text_field($_POST['account']) : '';
+            $bank = isset($_POST['bank']) ? sanitize_text_field($_POST['bank']) : '';
+            $image_id = isset($_POST['image_id']) ? intval($_POST['image_id']) : 0;
+            $method_id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+            $type = isset($_POST['type']) ? sanitize_text_field($_POST['type']) : '';
+
+            // ✅ Validación
+            if (empty($name) || empty($account) || empty($bank) || !$image_id || !$method_id) {
+                wp_send_json_error(['message' => 'Todos los campos son obligatorios']);
+                return;
+            }
+
+            $manager = new Payment_Methods_Manager();
+            $result = $manager->update($method_id, [
+                'name' => $name,
+                'account' => $account,
+                'bank' => $bank,
+                'image' => $image_id,
+                'type' => $type
+            ]);
+
+            if ($result) {
+                wp_send_json_success([
+                    'message' => 'Método actualizado exitosamente',
+                    'data' => $result
+                ]);
+            } else {
+                wp_send_json_error(['message' => 'Error al actualizar el método']);
+            }
+            
+            break;
+            
+        default:
+            wp_send_json_error(['message' => 'Acción no válida']);
+            break;
+    }
+}

@@ -1,0 +1,12 @@
+<div class="payment-validation-section my-8">
+    <div class="w-full max-w-7xl mx-auto rounded-md border border-t-gray-300">
+        <raffle-payment-validation />
+    </div>
+</div>
+
+{{ localize_script('JuztExtensionRaffle', {
+    nonce: wp_nonce('wp_rest'),
+    apiUrl: '/wp-json/juzt-raffle-extension/frontend/v1'
+}) }}
+
+{{ enqueue_asset('js', 'payment-validation', '/js/rafflePayment.js?version=' ~ time_seconds(), asset_source) }}

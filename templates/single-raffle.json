@@ -1,6 +1,6 @@
 {
     "name": "single-raffle",
-    "description": "Template for CTP Raffles",
+    "description": "Template 121212",
     "template": true,
     "order": [
         "main-raffle"
@@ -79,7 +79,7 @@
                         "account_bank": "Zinli",
                         "account_number": "1111111111111",
                         "account_type": "Online",
-                        "account_name": "Jesus2323"
+                        "account_name": "1212121212121212"
                     }
                 }
             ]

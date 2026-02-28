@@ -9,6 +9,8 @@ class Frontend_API
     private static $instance = null;
     private $namespace = "juzt-raffle-extension/frontend/v1";
 
+    private DbTransactionManager $db_manager;
+
     public static function instance()
     {
         if (self::$instance === null) {
@@ -20,6 +22,7 @@ class Frontend_API
 
     public function __construct()
     {
+        $this->db_manager = new DbTransactionManager();
         add_action("rest_api_init", array($this, "register_routes"));
     }
 
@@ -52,6 +55,16 @@ class Frontend_API
                 'methods' => 'GET',
                 'callback' => [$this, 'test_rest'],
                 'permission_callback' => '__return_true'
+            ]
+        );
+
+        register_rest_route(
+            $this->namespace,
+            '/upload-payment-proof',
+            [
+                'methods' => 'POST',
+                'callback' => [$this, 'register_payment_proof'],
+                'permission_callback' => [$this, 'check_public_nonce']
             ]
         );
     }
@@ -223,6 +236,75 @@ class Frontend_API
         }
 
         return true;
+    }
+
+    public function register_payment_proof($request)
+    {
+        $step = (int) $request->get_param('step');
+        $email = $request->get_param('email');
+        
+        if(empty($email) || empty($step)) {
+            return new WP_Error(
+                'missing_fields',
+                'Faltan campos requeridos',
+                ['status' => 400]
+            );
+        }
+
+        if($step === 1) {
+            $orders = $this->db_manager->get_order_by_email($email);
+
+            if(!$orders) {
+                return new WP_Error(
+                    'order_not_found',
+                    'No se encontró una orden para este correo',
+                    ['status' => 404]
+                );
+            }
+
+            return rest_ensure_response($orders);
+        }
+
+        if( $step === 2) {
+            $order_id = $request->get_param('order_id');
+                $files = $request->get_file_params();
+    
+                if (!empty($files['payment_proof'])) {
+                    require_once(ABSPATH . 'wp-admin/includes/file.php');
+    
+                    $uploaded = wp_handle_upload($files['payment_proof'], ['test_form' => false]);
+    
+                    if (!isset($uploaded['error'])) {
+                        $screenshot_url = $uploaded['url'];
+    
+                        $payment_record = Juzt_Raffle_Database::get_instance()->upload_payment_proof(
+                            $order_id,
+                            2,
+                            $screenshot_url
+                        );
+    
+                        if (!$payment_record) {
+                            return new WP_Error('database_error', "Error al subir comprobante de pago", ['status' => 400]);
+                        }
+    
+                    } else {
+                        return new WP_Error('upload_error', $uploaded['error'], ['status' => 400]);
+                    }
+                } else {
+                    return new WP_Error('upload_error', "Archivo no enviado", ['status' => 400]);
+                }
+
+            return rest_ensure_response([
+                'success' => true,
+                'message' => 'Paso 2 completado, ahora sube tu comprobante de pago'
+            ]);
+        }
+
+
+        return rest_ensure_response([
+            'success' => true,
+            'message' => 'Comprobante de pago subido exitosamente'
+        ]);
     }
 
 }

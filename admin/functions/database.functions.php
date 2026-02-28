@@ -446,12 +446,13 @@ class Juzt_Raffle_Database
         return $updated !== false;
     }
 
-    public function validate_missing_payments($orderId){
+    public function validate_missing_payments($orderId)
+    {
         $order_ammount = $this->get_order($orderId)['total_amount'];
         $payments = $this->get_order_payments($orderId);
         $total_paid = 0;
-        foreach($payments as $payment){
-            if($payment['status'] === 'verified'){
+        foreach ($payments as $payment) {
+            if ($payment['status'] === 'verified') {
                 $total_paid += floatval($payment['amount']);
             }
         }
@@ -501,6 +502,8 @@ class Juzt_Raffle_Database
                 ));
             }
 
+            $missing_amount = $this->validate_missing_payments($order_id);
+
             // ✅ Registrar en historial
             $this->add_history(
                 $order_id,
@@ -510,8 +513,51 @@ class Juzt_Raffle_Database
                 "user_{$user_id}"
             );
 
+            $this->add_history(
+                $order_id,
+                'payment_amount_updated',
+                "El monto a pagar ahora es: {$missing_amount}",
+                json_encode(array('installment' => $installment_number, 'amount' => $payment->amount, 'missing_amount' => $missing_amount)),
+                "user_{$user_id}"
+            );
+
             // ✅ Verificar si todos los pagos están verificados
             $this->check_all_payments_verified($order_id);
+
+            if ($missing_amount > 0) {
+                $this->add_history(
+                    $order_id,
+                    'payment_pending',
+                    "Faltan {$missing_amount} por pagar",
+                    json_encode(array('installment' => $installment_number, 'missing_amount' => $missing_amount)),
+                    'system'
+                );
+
+                $order = $this->get_order($order_id);
+
+                $email = EmailHandler::generate_email('order-cliente-payment-part', [
+                    'raffle' => $this->get_raffle($order),
+                    'order' => $order,
+                    'order_number' => $order['order_number'],
+                    'missing_amount' => $missing_amount
+                ]);
+
+                $send = EmailHandler::send(
+                    $order["customer_email"],
+                    "Se ha validado el pago de tu orden {$order['order_number']} - Falta pago de {$missing_amount} USD",
+                    $email
+                );
+
+
+            } else {
+                $this->add_history(
+                    $order_id,
+                    'payment_completed',
+                    "Todos los pagos verificados. Orden completa.",
+                    null,
+                    'system'
+                );
+            }
         }
 
         return $updated !== false;
@@ -926,5 +972,5 @@ class Juzt_Raffle_Database
         return $raffle;
     }
 
-    
+
 }

@@ -27,6 +27,8 @@ RaffleApp.router.register('/raffles', 'raffle-list');
 RaffleApp.router.register('/raffle/new', 'raffle-form');
 RaffleApp.router.register('/raffle/edit/:id', 'raffle-form');
 
+RaffleApp.router.register('/payments', 'payments');
+
 // ============================================
 // CONFIGURAR ALPINE
 // ============================================
@@ -36,6 +38,7 @@ window.addEventListener("alpine:init", () => {
     Alpine.data("RaffleAppAdmin", () => ({
         currentView: 'dashboard',
         routerParams: {},
+        modal: null,
         
         init() {
             console.log("🎟️ Juzt Raffle Admin inicializado");
@@ -56,11 +59,18 @@ window.addEventListener("alpine:init", () => {
         
         showView(view) {
             RaffleApp.router.navigate(`/${view}`);
+        },
+
+        initModal(){
+            this.modal = RaffleApp.modal.data();
+            return this.modal;
         }
     }));
 
     Alpine.data("RaffleAppDashboardView", () => RaffleApp.controllers.dashboard.data());
     Alpine.data("RaffleAppOrderView", () => RaffleApp.controllers.order.data());
+
+    Alpine.data("RaffleAppPaymentsView", () => RaffleApp.controllers.payment.data());
 
     Alpine.data("RaffleAppRaffleListView", () => RaffleApp.controllers.raffle.listData());
     Alpine.data("RaffleAppRaffleFormView", () => RaffleApp.controllers.raffle.formData());

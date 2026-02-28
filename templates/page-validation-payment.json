@@ -1,0 +1,16 @@
+{
+    "name": "page-validation-payment",
+    "description": "Template for validation payment page",
+    "template": true,
+    "order": [
+        "section_1772137132754"
+    ],
+    "sections": {
+        "section_1772137132754": {
+            "section_id": "payment-validation",
+            "settings": [],
+            "blocks": []
+        }
+    },
+    "post_type": "page"
+}

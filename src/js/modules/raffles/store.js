@@ -1,6 +1,7 @@
 class Store {
     constructor() {
         this.state = {
+            payments: [],
             orders: [],
             raffles: [],
             loading: false,

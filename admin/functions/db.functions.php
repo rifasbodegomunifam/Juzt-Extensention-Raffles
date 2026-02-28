@@ -80,4 +80,13 @@ class DbTransactionManager {
             return ['success' => true];
         });
     }
+
+    public function get_order_by_email($email) {
+        return $this->transaction(function($wpdb) use ($email) {
+            
+            $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}raffle_orders WHERE customer_email = %s AND status != 'completed'", $email), ARRAY_A);
+            
+            return ['success' => true, 'orders' => $results];
+        });
+    }
 }

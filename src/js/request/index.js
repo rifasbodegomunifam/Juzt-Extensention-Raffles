@@ -6,6 +6,33 @@ class HandleRequest {
         console.log("vuukd");
     }
 
+    static async getOrdersByEmail(email) {
+        try {
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('step', 1);
+            const response = await fetch(`${this.apiBase}/upload-payment-proof`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-WP-Nonce': window.JuztExtensionRaffle.nonce || ''
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Error al obtener las órdenes');
+            }
+
+            return data.orders || [];
+
+        } catch (error) {
+            console.error('Error en getOrdersByEmail:', error);
+            throw error; // Re-lanzar para que lo capture el componente
+        }
+    }
+
     // request.js
     static async saveOrder(order) {
         try {

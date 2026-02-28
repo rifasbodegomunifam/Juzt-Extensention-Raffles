@@ -17,7 +17,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$plugin_data = get_plugin_data(__FILE__);
+$plugin_data = get_file_data(__FILE__, [
+    'Version' => 'Version',
+]);
 
 // Definir constantes
 define('JUZT_EXTENSION_TEMPLATE_VERSION', $plugin_data['Version']);

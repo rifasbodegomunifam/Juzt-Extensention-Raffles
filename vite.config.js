@@ -28,6 +28,7 @@ export default defineConfig({
         index: 'src/js/index.js',
         raffleAdmin: 'src/js/raffle.js',
         raffleDetail: 'src/js/raffle-detail.js',
+        rafflePayment: 'src/js/raffle-payment-page.js',
       },
 
       output: {
