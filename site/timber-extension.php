@@ -19,8 +19,13 @@ if (class_exists('Twig\Extension\AbstractExtension')) {
                 new TwigFunction('share_url', [$this, 'getShareUrl']),
                 new TwigFunction('get_related_post', [$this, 'getRelatedPost']),
                 new TwigFunction('get_query_param', [$this, 'getQueryParam']),
-                new TwigFunction('get_raffle_order', [$this, 'getRaffleOrder'])
+                new TwigFunction('get_raffle_order', [$this, 'getRaffleOrder']),
+                new TwigFunction('get_missing_tickets', [$this, 'get_missing_tickets']),
             ];
+        }
+
+        public function get_missing_tickets($raffle_id){
+            return Juzt_Raffle_Database::get_instance()->get_available_numbers_count($raffle_id);
         }
 
         public function getRelatedPost($post, $quantity=5, $args=array()){

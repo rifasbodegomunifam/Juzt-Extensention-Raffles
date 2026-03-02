@@ -6,6 +6,30 @@ class HandleRequest {
         console.log("vuukd");
     }
 
+    static async sendPaymentProof(formData) {
+        try {
+            const response = await fetch(`${this.apiBase}/upload-payment-proof`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-WP-Nonce': window.JuztExtensionRaffle.nonce || ''
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Error al enviar el comprobante');
+            }
+
+            return data;
+
+        } catch (error) {
+            console.error('Error en sendPaymentProof:', error);
+            throw error; // Re-lanzar para que lo capture el componente
+        }  
+    }
+
     static async getOrdersByEmail(email) {
         try {
             const formData = new FormData();

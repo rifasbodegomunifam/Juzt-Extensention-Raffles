@@ -173,16 +173,7 @@ function juzt_approve_order_handler()
         return;
     }
 
-    // Verificar que todos los pagos estén verificados
-    $all_verified = true;
-    foreach ($order['payments'] as $payment) {
-        if ($payment['status'] !== 'verified') {
-            $all_verified = false;
-            break;
-        }
-    }
-
-    if (!$all_verified) {
+    if ($order['status'] !== 'payment_complete') {
         wp_send_json_error(['message' => 'Todos los pagos deben estar verificados antes de aprobar']);
         return;
     }

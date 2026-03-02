@@ -16,9 +16,12 @@ export default defineConfig({
     cors: true,
   },
 
+  base: '/wp-content/plugins/juzt-extensention-raffles/assets/',
+
   build: {
 
     outDir: 'assets',
+    assetsDir: '.',
     cssCodeSplit: true,
 
 
@@ -39,6 +42,11 @@ export default defineConfig({
           // Debug: ver qué está pasando
           if (names.length > 0 && names[0]?.endsWith('.css')) {
             console.log('CSS names:', names); // ← Agrega esto
+          }
+
+          // Mantener las banderas en img/
+          if (/flags.*\.png$/.test(assetInfo.name)) {
+              return 'img/[name][extname]';
           }
 
           const name = names[0] || assetInfo.name;

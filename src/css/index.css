@@ -5,6 +5,8 @@
 @theme {
     --color-dark-bg: #1a1a1a;
     --color-darker-bg: #0f0f0f;
+    --font-headings: var(--body-fonts);
+    --font-body: var(--body-fonts);
 }
 
 .index {
@@ -25,4 +27,25 @@
 
 .splide__slide {
     @apply cursor-grab!;
+}
+
+/* In your main CSS file, e.g., styles.css */
+progress {
+  /* General styles */
+  @apply rounded-lg;
+}
+
+/* WebKit (Chrome, Safari, Edge) background/track */
+progress::-webkit-progress-bar {
+  @apply bg-gray-200 rounded-lg;
+}
+
+/* WebKit (Chrome, Safari, Edge) value/filled bar */
+progress::-webkit-progress-value {
+  @apply bg-red-600 rounded-lg; /* Change color here */
+}
+
+/* Firefox value/filled bar */
+progress::-moz-progress-bar {
+  @apply bg-red-600 rounded-lg; /* Change color here */
 }

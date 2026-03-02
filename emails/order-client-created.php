@@ -10,7 +10,7 @@
                 <td>
                   <img
                     src="https://rifasbodegomunifam.com/wp-content/uploads/2026/01/logo-original.webp"
-                    style="width: 300px; margin: auto; display: block; border: 0;" alt="Logo">
+                    style="width: 200px; margin: auto; display: block; border: 0;" alt="Logo">
                 </td>
               </tr>
             </table>

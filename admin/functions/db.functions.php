@@ -38,6 +38,25 @@ class DbTransactionManager {
             return ['success' => true];
         });
     }
+
+    public function get_raffle($id){
+        $raffle = $this->transaction(function($wpdb) use ($id) {
+            $result = get_post($id);
+            if (!$result || $result->post_type !== 'raffle') {
+                return null;
+            }
+            $raffle = [
+                'id' => $result->ID,
+                'title' => $result->post_title,
+                'content' => $result->post_content,
+                'status' => $result->post_status,
+                'price' => floatval(get_post_meta($result->ID, '_raffle_price', true)),
+                
+            ];
+            return $raffle;
+        });
+        return $raffle;
+    }
     
     /**
      * Actualizar orden con transacción
@@ -83,8 +102,12 @@ class DbTransactionManager {
 
     public function get_order_by_email($email) {
         return $this->transaction(function($wpdb) use ($email) {
-            
             $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}raffle_orders WHERE customer_email = %s AND status != 'completed'", $email), ARRAY_A);
+
+            $results = array_map(function($order) {
+                $order['raffle'] = $this->get_raffle($order['raffle_id']);
+                return $order;
+            }, $results);
             
             return ['success' => true, 'orders' => $results];
         });

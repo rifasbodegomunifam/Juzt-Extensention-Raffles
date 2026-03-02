@@ -446,6 +446,45 @@ class Juzt_Raffle_Database
         return $updated !== false;
     }
 
+    public function register_payment_proof($order_id, $installment_number, $proof_url){
+        global $wpdb;
+        $table = self::get_payments_table();
+        $insert = $wpdb->insert(
+            $table,
+            array(
+                'order_id' => $order_id,
+                'installment_number' => $installment_number,
+                'payment_proof_url' => esc_url_raw($proof_url),
+                'uploaded_at' => current_time('mysql'),
+                'status' => 'pending'
+            ),
+            array('%d', '%d', '%s', '%s', '%s')
+        );
+
+        if($insert){
+            $payment_id = $wpdb->insert_id;
+
+            // ✅ Registrar en historial
+            $this->add_history(
+                $order_id,
+                'payment_uploaded',
+                "Comprobante de cuota #{$installment_number} subido",
+                json_encode(array('installment' => $installment_number, 'proof_url' => $proof_url)),
+                'customer'
+            );
+
+            return array(
+                'success' => true,
+                'payment_id' => $payment_id
+            );
+        } else {
+            return array(
+                'success' => false,
+                'error' => $wpdb->last_error
+            );
+        }
+    }
+
     public function validate_missing_payments($orderId)
     {
         $order_ammount = $this->get_order($orderId)['total_amount'];
@@ -609,10 +648,7 @@ class Juzt_Raffle_Database
         $table = self::get_payments_table();
 
         // Contar pagos pendientes
-        $pending = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$table} WHERE order_id = %d AND status = 'pending'",
-            $order_id
-        ));
+        $pending = $this->validate_missing_payments($order_id);
 
         // Si no hay pagos pendientes, la orden puede ser aprobada
         if (intval($pending) === 0) {
@@ -970,6 +1006,17 @@ class Juzt_Raffle_Database
         ];
 
         return $raffle;
+    }
+
+    public function get_installments($order_id)
+    {
+        global $wpdb;
+        $table = self::get_payments_table();
+
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM {$table} WHERE order_id = %d ORDER BY installment_number ASC",
+            $order_id
+        ), ARRAY_A);
     }
 
 

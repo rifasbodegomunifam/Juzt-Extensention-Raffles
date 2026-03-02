@@ -1,12 +1,12 @@
 {% set raffle_date  = get_post_meta("_raffle_date", raffle.id) %}
 {% set raffle_price  = get_post_meta("_raffle_price", raffle.id) %}
 {% set thumbnail_id  = get_post_meta("_thumbnail_id", raffle.id) %}
+{% set missing_tickets = get_missing_tickets(raffle.id) %}
+{% set limit = get_post_meta('_raffle_ticket_limit', raffle.id) %}
 
-<div class="bg-[#1a1a1a] rounded-xl overflow-hidden border border-gray-800 hover:border-red-600 transition-colors flex flex-col">
+<div class="bg-[#1a1a1a] rounded-xl overflow-hidden border border-gray-800 hover:border-red-600 transition-colors flex flex-col min-h-72">
 	<div class="relative">
-		<img alt="{{ raffle.title }}" srcset="{{ thumbnail_id | attachment_srcset }}" sizes="(max-width: 640px) 100vw, 
-           (max-width: 1024px) 50vw, 
-           33vw" class="object-cover w-full h-72"/>
+		{{ snippet('image', { attachment_id: thumbnail_id, alt: raffle.title, class: 'object-cover w-full h-72', loading: 'lazy', fetchPriority: 'high' }) }}
 	</div>
 	
 	<!-- ✅ Agregar flex flex-col flex-1 -->
@@ -24,6 +24,10 @@
 					<div class="text-xs text-gray-400">Sorteo</div>
 					<div class="text-sm font-semibold text-white">{{ raffle_date|date_format('d M, Y - g:i A') }}</div>
 				</div>
+			</div>
+			<div class="flex justify-between mb-3">
+				<div class="text-xs text-gray-400">Boletos disponibles</div>
+				<div class="text-sm font-semibold text-white">{{ missing_tickets }} de {{ limit }}</div>
 			</div>
 		</div>
 		

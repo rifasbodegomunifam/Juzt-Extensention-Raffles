@@ -6,22 +6,25 @@
 {% set raffle_price_cop = exchange_api_convert(raffle_price, "usd", "cop") %}
 {% set raffle_price_ves = exchange_api_convert(raffle_price, "usd", "ves") %}
 {% set allow_installments = get_post_meta('_raffle_allow_installments', post.id) %}
+{% set limit = get_post_meta('_raffle_ticket_limit', post.id) %}
 
 {% set share_title = "¡Participa en " ~ post.title ~ "!" %}
 {% set share_description = "Sorteo de " ~ post.title ~ " - No te lo pierdas" %}
 {% set share_uri = post.link %}
 
+{% set payment_options = fn('get_option', 'juzt_payment_methods', []) %}
+
 {% set payments_transformed = [] %}
 
-{% for payment in section.blocks %}
+{% for payment in payment_options %}
     {% set payment_copy = payment %}
     
     {# Si logo_bank es numérico, obtener URL #}
-    {% if payment.settings.logo_bank is not empty %}
-        {% set logo_url = payment.settings.logo_bank | attachment_url %}
-		{% set logo_srcset = payment.settings.logo_bank | attachment_srcset %}
+    {% if payment.image is not empty %}
+        {% set logo_url = payment.image | attachment_url %}
+		{% set logo_srcset = payment.image | attachment_srcset %}
         {% set payment_copy = payment_copy | merge({
-            settings: payment.settings | merge({
+            settings: payment | merge({
                 logo_bank: logo_url,
 				logo_bank_srcset: logo_srcset,
 				open: false
@@ -31,6 +34,8 @@
     
     {% set payments_transformed = payments_transformed | merge([payment_copy]) %}
 {% endfor %}
+
+{% set missing_tickets = get_missing_tickets(post.id) %}
 
 <style>
 	.custom-scrollbar::-webkit-scrollbar {
@@ -86,7 +91,15 @@
 				</div>
 
 				<header class="mb-6">
-					<h1 class="text-2xl lg:text-4xl text-center font-bold text-red-600">{{ post.title }}</h1>
+					<h1 class="text-2xl lg:text-4xl text-center font-bold text-red-500">{{ post.title }}</h1>
+					<div class="flex flex-col md:flex-row md:justify-between items-center mt-4">
+						<div class="text-md text-center text-gray-400">
+							{{ missing_tickets }} de {{ limit }} boletos disponibles
+						</div>
+						<progress class="bg-red-600 w-full h-4 mt-4 rounded-xl overflow-hidden" value="{{ missing_tickets }}" max="{{ limit }}">
+							<div class="bg-red-600 h-full" style="width: {{ ((limit - missing_tickets) / limit) * 100 }}%"></div>
+						</progress>
+					</div>
 				</header>
 
 				<!-- Imagen del Producto -->
@@ -208,7 +221,6 @@
     apiUrl: '/wp-json/juzt-raffle-extension/frontend/v1'
 }) }}
 
-
-{{ enqueue_asset('js', 'detail-raffle', '/js/raffleDetail.js?version=' ~ time_seconds(), asset_source) }}
-{{ enqueue_asset('css', 'detail-raffle-css', '/css/raffleDetail.css?version=' ~ time_seconds(), asset_source) }}
+{{ enqueue_asset('js', 'detail-raffle', '/js/raffleDetail.js', asset_source) }} 
+{{ enqueue_asset('css', 'detail-raffle-css', '/css/raffleDetail.css', asset_source) }}
 

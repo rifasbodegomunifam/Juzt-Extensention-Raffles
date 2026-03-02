@@ -3,7 +3,6 @@ import Toastify from 'toastify-js';
 import "toastify-js/src/toastify.css";
 import HandleRequest from '../request';
 import filecss from '../../../assets/css/index.css?inline';
-
 class RaffleForm extends LitElement {
 
     static properties = {
@@ -19,10 +18,18 @@ class RaffleForm extends LitElement {
         cta_text: { type: String },
         loading: { type: Boolean },
         proccesing: { type: Boolean },
-        showone: { type: String }
+        showone: { type: String },
+        phoneNumber: { type: String },
+
+        // ✅ AGREGAR ESTAS PROPIEDADES
+        selectedCountry: { type: String },
+        phoneValue: { type: String },
+        showDropdown: { type: Boolean }
     };
 
-    static styles = [css`${unsafeCSS(filecss)}`];
+    static styles = [
+        css`${unsafeCSS(filecss)}`,
+    ];
 
     constructor() {
         super();
@@ -45,6 +52,245 @@ class RaffleForm extends LitElement {
         this.numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         this.allowinstallments = false;
 
+        this.phoneNumber = '';
+        this.itiInstance = null;
+
+        this.countries = [
+            // América
+            { code: 'AR', name: 'Argentina', dialCode: '+54' },
+            { code: 'BO', name: 'Bolivia', dialCode: '+591' },
+            { code: 'BR', name: 'Brasil', dialCode: '+55' },
+            { code: 'CA', name: 'Canadá', dialCode: '+1' },
+            { code: 'CL', name: 'Chile', dialCode: '+56' },
+            { code: 'CO', name: 'Colombia', dialCode: '+57' },
+            { code: 'CR', name: 'Costa Rica', dialCode: '+506' },
+            { code: 'CU', name: 'Cuba', dialCode: '+53' },
+            { code: 'DO', name: 'República Dominicana', dialCode: '+1' },
+            { code: 'EC', name: 'Ecuador', dialCode: '+593' },
+            { code: 'SV', name: 'El Salvador', dialCode: '+503' },
+            { code: 'GT', name: 'Guatemala', dialCode: '+502' },
+            { code: 'HT', name: 'Haití', dialCode: '+509' },
+            { code: 'HN', name: 'Honduras', dialCode: '+504' },
+            { code: 'MX', name: 'México', dialCode: '+52' },
+            { code: 'NI', name: 'Nicaragua', dialCode: '+505' },
+            { code: 'PA', name: 'Panamá', dialCode: '+507' },
+            { code: 'PY', name: 'Paraguay', dialCode: '+595' },
+            { code: 'PE', name: 'Perú', dialCode: '+51' },
+            { code: 'PR', name: 'Puerto Rico', dialCode: '+1' },
+            { code: 'UY', name: 'Uruguay', dialCode: '+598' },
+            { code: 'US', name: 'Estados Unidos', dialCode: '+1' },
+            { code: 'VE', name: 'Venezuela', dialCode: '+58' },
+
+            // Europa
+            { code: 'AL', name: 'Albania', dialCode: '+355' },
+            { code: 'AD', name: 'Andorra', dialCode: '+376' },
+            { code: 'AT', name: 'Austria', dialCode: '+43' },
+            { code: 'BE', name: 'Bélgica', dialCode: '+32' },
+            { code: 'BA', name: 'Bosnia y Herzegovina', dialCode: '+387' },
+            { code: 'BG', name: 'Bulgaria', dialCode: '+359' },
+            { code: 'HR', name: 'Croacia', dialCode: '+385' },
+            { code: 'CY', name: 'Chipre', dialCode: '+357' },
+            { code: 'CZ', name: 'República Checa', dialCode: '+420' },
+            { code: 'DK', name: 'Dinamarca', dialCode: '+45' },
+            { code: 'EE', name: 'Estonia', dialCode: '+372' },
+            { code: 'FI', name: 'Finlandia', dialCode: '+358' },
+            { code: 'FR', name: 'Francia', dialCode: '+33' },
+            { code: 'DE', name: 'Alemania', dialCode: '+49' },
+            { code: 'GR', name: 'Grecia', dialCode: '+30' },
+            { code: 'HU', name: 'Hungría', dialCode: '+36' },
+            { code: 'IS', name: 'Islandia', dialCode: '+354' },
+            { code: 'IE', name: 'Irlanda', dialCode: '+353' },
+            { code: 'IT', name: 'Italia', dialCode: '+39' },
+            { code: 'LV', name: 'Letonia', dialCode: '+371' },
+            { code: 'LT', name: 'Lituania', dialCode: '+370' },
+            { code: 'LU', name: 'Luxemburgo', dialCode: '+352' },
+            { code: 'MT', name: 'Malta', dialCode: '+356' },
+            { code: 'MD', name: 'Moldavia', dialCode: '+373' },
+            { code: 'MC', name: 'Mónaco', dialCode: '+377' },
+            { code: 'ME', name: 'Montenegro', dialCode: '+382' },
+            { code: 'NL', name: 'Países Bajos', dialCode: '+31' },
+            { code: 'NO', name: 'Noruega', dialCode: '+47' },
+            { code: 'PL', name: 'Polonia', dialCode: '+48' },
+            { code: 'PT', name: 'Portugal', dialCode: '+351' },
+            { code: 'RO', name: 'Rumania', dialCode: '+40' },
+            { code: 'RU', name: 'Rusia', dialCode: '+7' },
+            { code: 'RS', name: 'Serbia', dialCode: '+381' },
+            { code: 'SK', name: 'Eslovaquia', dialCode: '+421' },
+            { code: 'SI', name: 'Eslovenia', dialCode: '+386' },
+            { code: 'ES', name: 'España', dialCode: '+34' },
+            { code: 'SE', name: 'Suecia', dialCode: '+46' },
+            { code: 'CH', name: 'Suiza', dialCode: '+41' },
+            { code: 'UA', name: 'Ucrania', dialCode: '+380' },
+            { code: 'GB', name: 'Reino Unido', dialCode: '+44' },
+            { code: 'VA', name: 'Ciudad del Vaticano', dialCode: '+379' },
+
+            // Asia
+            { code: 'AF', name: 'Afganistán', dialCode: '+93' },
+            { code: 'AM', name: 'Armenia', dialCode: '+374' },
+            { code: 'AZ', name: 'Azerbaiyán', dialCode: '+994' },
+            { code: 'BH', name: 'Baréin', dialCode: '+973' },
+            { code: 'BD', name: 'Bangladés', dialCode: '+880' },
+            { code: 'BT', name: 'Bután', dialCode: '+975' },
+            { code: 'BN', name: 'Brunéi', dialCode: '+673' },
+            { code: 'KH', name: 'Camboya', dialCode: '+855' },
+            { code: 'CN', name: 'China', dialCode: '+86' },
+            { code: 'GE', name: 'Georgia', dialCode: '+995' },
+            { code: 'IN', name: 'India', dialCode: '+91' },
+            { code: 'ID', name: 'Indonesia', dialCode: '+62' },
+            { code: 'IR', name: 'Irán', dialCode: '+98' },
+            { code: 'IQ', name: 'Irak', dialCode: '+964' },
+            { code: 'IL', name: 'Israel', dialCode: '+972' },
+            { code: 'JP', name: 'Japón', dialCode: '+81' },
+            { code: 'JO', name: 'Jordania', dialCode: '+962' },
+            { code: 'KZ', name: 'Kazajistán', dialCode: '+7' },
+            { code: 'KW', name: 'Kuwait', dialCode: '+965' },
+            { code: 'KG', name: 'Kirguistán', dialCode: '+996' },
+            { code: 'LA', name: 'Laos', dialCode: '+856' },
+            { code: 'LB', name: 'Líbano', dialCode: '+961' },
+            { code: 'MY', name: 'Malasia', dialCode: '+60' },
+            { code: 'MV', name: 'Maldivas', dialCode: '+960' },
+            { code: 'MN', name: 'Mongolia', dialCode: '+976' },
+            { code: 'MM', name: 'Myanmar', dialCode: '+95' },
+            { code: 'NP', name: 'Nepal', dialCode: '+977' },
+            { code: 'KP', name: 'Corea del Norte', dialCode: '+850' },
+            { code: 'OM', name: 'Omán', dialCode: '+968' },
+            { code: 'PK', name: 'Pakistán', dialCode: '+92' },
+            { code: 'PS', name: 'Palestina', dialCode: '+970' },
+            { code: 'PH', name: 'Filipinas', dialCode: '+63' },
+            { code: 'QA', name: 'Catar', dialCode: '+974' },
+            { code: 'SA', name: 'Arabia Saudita', dialCode: '+966' },
+            { code: 'SG', name: 'Singapur', dialCode: '+65' },
+            { code: 'KR', name: 'Corea del Sur', dialCode: '+82' },
+            { code: 'LK', name: 'Sri Lanka', dialCode: '+94' },
+            { code: 'SY', name: 'Siria', dialCode: '+963' },
+            { code: 'TW', name: 'Taiwán', dialCode: '+886' },
+            { code: 'TJ', name: 'Tayikistán', dialCode: '+992' },
+            { code: 'TH', name: 'Tailandia', dialCode: '+66' },
+            { code: 'TR', name: 'Turquía', dialCode: '+90' },
+            { code: 'TM', name: 'Turkmenistán', dialCode: '+993' },
+            { code: 'AE', name: 'Emiratos Árabes Unidos', dialCode: '+971' },
+            { code: 'UZ', name: 'Uzbekistán', dialCode: '+998' },
+            { code: 'VN', name: 'Vietnam', dialCode: '+84' },
+            { code: 'YE', name: 'Yemen', dialCode: '+967' },
+
+            // África
+            { code: 'DZ', name: 'Argelia', dialCode: '+213' },
+            { code: 'AO', name: 'Angola', dialCode: '+244' },
+            { code: 'BJ', name: 'Benín', dialCode: '+229' },
+            { code: 'BW', name: 'Botsuana', dialCode: '+267' },
+            { code: 'BF', name: 'Burkina Faso', dialCode: '+226' },
+            { code: 'BI', name: 'Burundi', dialCode: '+257' },
+            { code: 'CM', name: 'Camerún', dialCode: '+237' },
+            { code: 'CV', name: 'Cabo Verde', dialCode: '+238' },
+            { code: 'CF', name: 'República Centroafricana', dialCode: '+236' },
+            { code: 'TD', name: 'Chad', dialCode: '+235' },
+            { code: 'KM', name: 'Comoras', dialCode: '+269' },
+            { code: 'CG', name: 'Congo', dialCode: '+242' },
+            { code: 'CD', name: 'República Democrática del Congo', dialCode: '+243' },
+            { code: 'CI', name: 'Costa de Marfil', dialCode: '+225' },
+            { code: 'DJ', name: 'Yibuti', dialCode: '+253' },
+            { code: 'EG', name: 'Egipto', dialCode: '+20' },
+            { code: 'GQ', name: 'Guinea Ecuatorial', dialCode: '+240' },
+            { code: 'ER', name: 'Eritrea', dialCode: '+291' },
+            { code: 'ET', name: 'Etiopía', dialCode: '+251' },
+            { code: 'GA', name: 'Gabón', dialCode: '+241' },
+            { code: 'GM', name: 'Gambia', dialCode: '+220' },
+            { code: 'GH', name: 'Ghana', dialCode: '+233' },
+            { code: 'GN', name: 'Guinea', dialCode: '+224' },
+            { code: 'GW', name: 'Guinea-Bisáu', dialCode: '+245' },
+            { code: 'KE', name: 'Kenia', dialCode: '+254' },
+            { code: 'LS', name: 'Lesoto', dialCode: '+266' },
+            { code: 'LR', name: 'Liberia', dialCode: '+231' },
+            { code: 'LY', name: 'Libia', dialCode: '+218' },
+            { code: 'MG', name: 'Madagascar', dialCode: '+261' },
+            { code: 'MW', name: 'Malaui', dialCode: '+265' },
+            { code: 'ML', name: 'Mali', dialCode: '+223' },
+            { code: 'MR', name: 'Mauritania', dialCode: '+222' },
+            { code: 'MU', name: 'Mauricio', dialCode: '+230' },
+            { code: 'MA', name: 'Marruecos', dialCode: '+212' },
+            { code: 'MZ', name: 'Mozambique', dialCode: '+258' },
+            { code: 'NA', name: 'Namibia', dialCode: '+264' },
+            { code: 'NE', name: 'Níger', dialCode: '+227' },
+            { code: 'NG', name: 'Nigeria', dialCode: '+234' },
+            { code: 'RW', name: 'Ruanda', dialCode: '+250' },
+            { code: 'ST', name: 'Santo Tomé y Príncipe', dialCode: '+239' },
+            { code: 'SN', name: 'Senegal', dialCode: '+221' },
+            { code: 'SC', name: 'Seychelles', dialCode: '+248' },
+            { code: 'SL', name: 'Sierra Leona', dialCode: '+232' },
+            { code: 'SO', name: 'Somalia', dialCode: '+252' },
+            { code: 'ZA', name: 'Sudáfrica', dialCode: '+27' },
+            { code: 'SS', name: 'Sudán del Sur', dialCode: '+211' },
+            { code: 'SD', name: 'Sudán', dialCode: '+249' },
+            { code: 'SZ', name: 'Esuatini', dialCode: '+268' },
+            { code: 'TZ', name: 'Tanzania', dialCode: '+255' },
+            { code: 'TG', name: 'Togo', dialCode: '+228' },
+            { code: 'TN', name: 'Túnez', dialCode: '+216' },
+            { code: 'UG', name: 'Uganda', dialCode: '+256' },
+            { code: 'ZM', name: 'Zambia', dialCode: '+260' },
+            { code: 'ZW', name: 'Zimbabue', dialCode: '+263' },
+
+            // Oceanía
+            { code: 'AU', name: 'Australia', dialCode: '+61' },
+            { code: 'FJ', name: 'Fiyi', dialCode: '+679' },
+            { code: 'KI', name: 'Kiribati', dialCode: '+686' },
+            { code: 'MH', name: 'Islas Marshall', dialCode: '+692' },
+            { code: 'FM', name: 'Micronesia', dialCode: '+691' },
+            { code: 'NR', name: 'Nauru', dialCode: '+674' },
+            { code: 'NZ', name: 'Nueva Zelanda', dialCode: '+64' },
+            { code: 'PW', name: 'Palaos', dialCode: '+680' },
+            { code: 'PG', name: 'Papúa Nueva Guinea', dialCode: '+675' },
+            { code: 'WS', name: 'Samoa', dialCode: '+685' },
+            { code: 'SB', name: 'Islas Salomón', dialCode: '+677' },
+            { code: 'TO', name: 'Tonga', dialCode: '+676' },
+            { code: 'TV', name: 'Tuvalu', dialCode: '+688' },
+            { code: 'VU', name: 'Vanuatu', dialCode: '+678' }
+        ].sort((a, b) => a.name.localeCompare(b.name));
+
+        // ✅ INICIALIZAR ESTAS PROPIEDADES
+        this.selectedCountry = 'CO'; // Colombia por defecto
+        this.phoneValue = '';
+        this.showDropdown = false;
+
+    }
+
+    // ✅ Mejorar la función para evitar errores
+    getFlagEmoji(countryCode) {
+        if (!countryCode) return '🏳️'; // Bandera blanca si no hay código
+
+        const codePoints = countryCode
+            .toUpperCase()
+            .split('')
+            .map(char => 127397 + char.charCodeAt());
+
+        return String.fromCodePoint(...codePoints);
+    }
+
+    get currentCountry() {
+        return this.countries.find(c => c.code === this.selectedCountry) || this.countries[0]; // Fallback al primero
+    }
+
+    firstUpdated() {
+
+    }
+
+    getPhoneNumber() {
+        if (this.itiInstance) {
+            return this.itiInstance.getNumber(); // Formato internacional: +573001234567
+        }
+        return '';
+    }
+
+    selectCountry(code) {
+        this.selectedCountry = code;
+        this.showDropdown = false;
+    }
+
+
+    isValidPhone() {
+        if (this.itiInstance) {
+            return this.itiInstance.isValidNumber();
+        }
+        return false;
     }
 
     togglePayment(index) {
@@ -73,7 +319,7 @@ class RaffleForm extends LitElement {
             }
         }
 
-        if(typeof this.allowinstallments === 'string') {
+        if (typeof this.allowinstallments === 'string') {
             this.allowinstallments = this.allowinstallments === 'true';
         }
 
@@ -243,15 +489,22 @@ class RaffleForm extends LitElement {
         this.cta_text = "Procesando";
         const formData = new FormData(event.target);
 
+        const country = this.currentCountry;
+
+        // ✅ Número completo
+        const cleanPhone = this.phoneValue.replace(/\D/g, '');
+        const fullPhone = `${country.dialCode}${cleanPhone}`;
+
         const data = {
             raffle_id: this.raffle,
             customer_name: formData.get('customer_name'),
             customer_email: formData.get('customer_email'),
-            customer_phone: formData.get('customer_phone'),
+            customer_phone: fullPhone,
             customer_address: formData.get('customer_address'),
             ticket_quantity: this.quantity,
             total_amount: this.totalPrice,
-            comprobante: this.selectedFile?.file
+            comprobante: this.selectedFile?.file,
+            send_email: true,
         };
 
         try {
@@ -325,7 +578,7 @@ class RaffleForm extends LitElement {
             'justify-center',
         ];
 
-        console.log("Price", this.totalRate);
+        const country = this.currentCountry;
 
         if ((this.showone === "paused" && this.quantity === 2) || (this.showone === 'active' && this.quantity == 1)) {
             decrementClass.push('pointer-none cursor-not-allowed');
@@ -399,17 +652,64 @@ class RaffleForm extends LitElement {
                         </div>
 
                         <div>
-                            <label for="telefono" class="block text-sm font-medium text-gray-300 mb-2">
+                            <label for="customer_phone" class="block text-sm font-medium text-gray-300 mb-2">
                                 Whatsapp <span class="text-red-600">*</span>
                             </label>
-                            <input
-                                type="tel"
-                                id="customer_phone"
-                                name="customer_phone"
-                                required
-                                placeholder="+57 300 123 4567"
-                                class="w-full bg-[#0f0f0f] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
-                            />
+                            
+                            <div class="relative flex gap-2">
+                                
+                                <!-- Selector de País -->
+                                <div class="relative">
+                                    <button
+                                        type="button"
+                                        @click=${() => this.showDropdown = !this.showDropdown}
+                                        class="flex items-center gap-2 px-3 py-3 bg-[#0f0f0f] border border-gray-700 rounded-lg text-white hover:border-red-600 transition-colors min-w-[120px]"
+                                    >
+                                        <span class="text-2xl">${this.getFlagEmoji(country?.code)}</span>
+                                        <span class="text-sm font-medium">${country.dialCode}</span>
+                                        <svg class="w-4 h-4 ml-auto transition-transform ${this.showDropdown ? 'rotate-180' : ''}" 
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <!-- Dropdown -->
+                                    ${this.showDropdown ? html`
+                                        <div class="absolute z-50 mt-2 w-80 bg-[#1a1a1a] border border-gray-700 rounded-lg shadow-2xl max-h-64 overflow-y-auto">
+                                            ${this.countries.map(c => html`
+                                                <button
+                                                    type="button"
+                                                    @click=${() => this.selectCountry(c.code)}
+                                                    class="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#0f0f0f] transition-colors ${c.code === this.selectedCountry ? 'bg-red-600/10 border-l-2 border-red-600' : ''}"
+                                                >
+                                                    <span class="text-2xl">${this.getFlagEmoji(c.code)}</span>
+                                                    <div class="flex-1 text-left">
+                                                        <div class="text-white text-sm font-medium">${c.name}</div>
+                                                        <div class="text-gray-400 text-xs">${c.dialCode}</div>
+                                                    </div>
+                                                    ${c.code === this.selectedCountry ? html`
+                                                        <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                                        </svg>
+                                                    ` : ''}
+                                                </button>
+                                            `)}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                
+                                <!-- Input -->
+                                <input
+                                    type="tel"
+                                    id="customer_phone"
+                                    name="customer_phone"
+                                    required
+                                    .value=${this.phoneValue}
+                                    @input=${(e) => this.phoneValue = e.target.value}
+                                    placeholder="3001234567"
+                                    class="flex-1 bg-[#0f0f0f] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors"
+                                />
+                            </div>
                         </div>
 
                         <div>
@@ -492,28 +792,28 @@ class RaffleForm extends LitElement {
                             <div class="flex justify-between items-center flex-col lg:flex-row!">
                                 <span class="text-gray-300 font-medium">Total a pagar:</span>
                                 <span class="text-md font-bold text-red-500">${new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                    }).format(this.totalPrice)}
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(this.totalPrice)}
                                 </span>
                                 
                                 ${this.totalPrice.cop > 0 ? html`
                                 <span class="text-md font-bold text-red-500">${new Intl.NumberFormat('es-CO', {
-                                    style: 'currency',
-                                    currency: 'COP',
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                    }).format(this.totalRate.cop)}
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(this.totalRate.cop)}
                                 </span>` : html`<span class="text-xs text-center w-20 block items-center">Conversion no disponible</span>`}
                                 
                                 ${this.totalPrice.ves > 0 ? html`<span class="text-md font-bold text-red-500">${new Intl.NumberFormat('es-VE', {
-                                    style: 'currency',
-                                    currency: 'VES',
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                    }).format(this.totalRate.ves)}
+            style: 'currency',
+            currency: 'VES',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(this.totalRate.ves)}
                                 </span>` : html`<span class="text-xs text-center w-20 block items-center">Conversion no disponible</span>`}
                             </div>
                         </div>
@@ -534,13 +834,13 @@ class RaffleForm extends LitElement {
                     <div class="flex flex-wrap gap-1.5 md:gap-3 mb-8">
                     ${this.payments.map((item, index) => html`
                         <button @click="${() => this.togglePayment(index)}" type="button" class="w-[50px] bg-white h-[50px] rounded-sm border border-red-600 cursor-pointer transition-all scale-100 hover:scale-110">
-                            ${this.selectedPaymentIndex === index ? html `<lucide-icon class="text-red-600 text-2xl" name="x" size="32"></lucide-icon>` : html `<img
+                            ${this.selectedPaymentIndex === index ? html`<lucide-icon class="text-red-600 text-2xl" name="x" size="32"></lucide-icon>` : html`<img
                                 class="w-full h-full object-cover"
                                 loading="lazy"
                                 src="${item.settings.logo_bank}"
                                 srcset="${item.settings.logo_bank_src}"
                                 alt="${item.settings.account_bank}"
-                                aria-labelby="Button for pyment method using ${item.settings.account_bank}"
+                                aria-labelby="Button for pyment method using ${item.settings.bank}"
                             />`}
                             
                         </button>
@@ -548,18 +848,18 @@ class RaffleForm extends LitElement {
                     </div>
 
                     ${this.payments.map((item, index) => html`
-                        ${this.selectedPaymentIndex == index ? html `
+                        ${this.selectedPaymentIndex == index ? html`
                             <div class="mb-4 p-4 bg-[#0f0f0f] border border-gray-700 rounded-lg">
                                 <div class="space-y-1 text-sm">
                                     <div class="flex justify-between">
                                         <span class="text-gray-400">Banco:</span>
-                                        <span class="text-white font-semibold">${item.settings.account_bank}</span>
+                                        <span class="text-white font-semibold">${item.settings.bank}</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-gray-400">Tipo:</span>
                                         <div class="flex justify-end lg:justify-between! gap-x-2.5 flex-wrap">
-                                            <span class="text-white font-semibold">${item.settings.account_type}</span>
-                                            <button @click=${() => this.onCopy(item.settings.account_type)} type="button" class="flex gap-1 items-center cursor-pointer">
+                                            <span class="text-white font-semibold">${item.settings.type}</span>
+                                            <button @click=${() => this.onCopy(item.settings.type)} type="button" class="flex gap-1 items-center cursor-pointer">
                                                 <lucide-icon name="copy" size="16"></lucide-icon>
                                                 <span>Copiar</span>
                                             </button>
@@ -568,8 +868,8 @@ class RaffleForm extends LitElement {
                                     <div class="flex justify-between gap-2.5 items-center">
                                         <span class="text-gray-400">Cuenta:</span>
                                         <div class="flex justify-end lg:justify-between! gap-x-2.5 flex-wrap">
-                                            <span class="text-white font-semibold">${item.settings.account_number}</span>
-                                            <button @click=${() => this.onCopy(item.settings.account_number)} type="button" class="flex gap-1 items-center cursor-pointer">
+                                            <span class="text-white font-semibold">${item.settings.account}</span>
+                                            <button @click=${() => this.onCopy(item.settings.account)} type="button" class="flex gap-1 items-center cursor-pointer">
                                                 <lucide-icon name="copy" size="16"></lucide-icon>
                                                 <span>Copiar</span>
                                             </button>
@@ -578,8 +878,8 @@ class RaffleForm extends LitElement {
                                     <div class="flex justify-between">
                                         <span class="text-gray-400">Titular:</span>
                                         <div class="flex justify-end lg:justify-between! gap-x-2.5 flex-wrap">
-                                            <span class="text-white font-semibold">${item.settings.account_name}</span>
-                                            <button @click=${() => this.onCopy(item.settings.account_name)} type="button" class="flex gap-1 items-center cursor-pointer">
+                                            <span class="text-white font-semibold">${item.settings.name}</span>
+                                            <button @click=${() => this.onCopy(item.settings.name)} type="button" class="flex gap-1 items-center cursor-pointer">
                                                 <lucide-icon name="copy" size="16"></lucide-icon>
                                                 <span>Copiar</span>
                                             </button>

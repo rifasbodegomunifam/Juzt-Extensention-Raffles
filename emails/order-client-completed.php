@@ -59,9 +59,9 @@
                   </table>
                 </td>
                 <td width="50%" valign="top" style="padding: 10px;">
-                  <ul style="list-style:none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
+                  <ul style="list-style:none;display:grid;grid-template-columns: 1fr 1fr 1fr 1fr;gap: 10px;">
                     <?php foreach($numeros as $numero): ?>
-                    <li style="color: #fff; display: inline-block; background: red; padding: 5px 10px; border-radius: 5px;"><?php echo $numero; ?></li>
+                    <li style="color:#fff;display:inline-block;background:red;padding:5px 10px;border-radius:5px;margin: 0;"><?php echo $numero; ?></li>
                     <?php endforeach; ?>
                   </ul>
                 </td>

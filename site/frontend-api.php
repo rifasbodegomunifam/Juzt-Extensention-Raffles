@@ -242,8 +242,8 @@ class Frontend_API
     {
         $step = (int) $request->get_param('step');
         $email = $request->get_param('email');
-        
-        if(empty($email) || empty($step)) {
+
+        if (empty($email) || empty($step)) {
             return new WP_Error(
                 'missing_fields',
                 'Faltan campos requeridos',
@@ -251,10 +251,10 @@ class Frontend_API
             );
         }
 
-        if($step === 1) {
+        if ($step === 1) {
             $orders = $this->db_manager->get_order_by_email($email);
 
-            if(!$orders) {
+            if (!$orders) {
                 return new WP_Error(
                     'order_not_found',
                     'No se encontró una orden para este correo',
@@ -265,46 +265,99 @@ class Frontend_API
             return rest_ensure_response($orders);
         }
 
-        if( $step === 2) {
+        if ($step === 2) {
             $order_id = $request->get_param('order_id');
-                $files = $request->get_file_params();
-    
-                if (!empty($files['payment_proof'])) {
-                    require_once(ABSPATH . 'wp-admin/includes/file.php');
-    
-                    $uploaded = wp_handle_upload($files['payment_proof'], ['test_form' => false]);
-    
-                    if (!isset($uploaded['error'])) {
-                        $screenshot_url = $uploaded['url'];
-    
-                        $payment_record = Juzt_Raffle_Database::get_instance()->upload_payment_proof(
-                            $order_id,
-                            2,
-                            $screenshot_url
-                        );
-    
-                        if (!$payment_record) {
-                            return new WP_Error('database_error', "Error al subir comprobante de pago", ['status' => 400]);
-                        }
-    
-                    } else {
-                        return new WP_Error('upload_error', $uploaded['error'], ['status' => 400]);
-                    }
-                } else {
-                    return new WP_Error('upload_error', "Archivo no enviado", ['status' => 400]);
-                }
+
+            $file = $_FILES['payment_proof'];
+
+            if (empty($file)) {
+                return new WP_Error(
+                    'missing_file',
+                    'Archivo de comprobante de pago es requerido',
+                    ['status' => 400]
+                );
+            }
+
+            // Validar tipo de archivo
+            $allowed_types = array('image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf');
+            $file_type = $file['type'];
+
+            if (!in_array($file_type, $allowed_types)) {
+                return new WP_Error(
+                    'invalid_file_type',
+                    'Tipo de archivo no permitido. Solo imágenes o PDF',
+                    ['status' => 400]
+                );
+            }
+
+            $max_size = 5 * 1024 * 1024; // 5MB
+            $file_size = $file['size'];
+
+            if ($file_size > $max_size) {
+                return new WP_Error(
+                    'file_too_large',
+                    'El archivo excede el tamaño máximo permitido de 5MB',
+                    ['status' => 400]
+                );
+            }
+
+            require_once(ABSPATH . 'wp-admin/includes/file.php');
+            require_once(ABSPATH . 'wp-admin/includes/media.php');
+            require_once(ABSPATH . 'wp-admin/includes/image.php');
+
+            $db = new Juzt_Raffle_Database();
+
+            $installments = $db->get_installments($order_id);
+
+            if (empty($installments)) {
+                return new WP_Error(
+                    'installments_not_found',
+                    'No se encontraron cuotas para esta orden',
+                    ['status' => 404]
+                );
+            }
+
+            $count = count($installments) + 1;
+            $attachement_id = media_handle_upload('payment_proof', 0);
+
+            if (is_wp_error($attachement_id)) {
+                return new WP_Error(
+                    'upload_error',
+                    'Error al subir el archivo: ' . $attachement_id->get_error_message(),
+                    ['status' => 500]
+                );
+            }
+
+            // Actualizar el registro de la cuota con el ID del archivo subido
+            $file_url = wp_get_attachment_url($attachement_id);
+            $record_result = $db->register_payment_proof($order_id, $count, $file_url);
+
+            if (!$record_result['success']) {
+                return new WP_Error(
+                    'database_error',
+                    'Error al guardar el comprobante de pago en la base de datos',
+                    ['status' => 500]
+                );
+            }
+
+            $db->add_history(
+                $order_id,
+                "payment_proof_uploaded",
+                "Comprobante de pago subido para la cuota #{$count}",
+                json_encode([
+                    'attachment_id' => $attachement_id,
+                    'file_url' => $file_url,
+                    'installment_number' => $count
+                ]),
+                'user_frontend_' . $email
+            );
 
             return rest_ensure_response([
                 'success' => true,
+                'attachment_url' => $file_url,
                 'message' => 'Paso 2 completado, ahora sube tu comprobante de pago'
             ]);
         }
-
-
-        return rest_ensure_response([
-            'success' => true,
-            'message' => 'Comprobante de pago subido exitosamente'
-        ]);
     }
 
 }
