@@ -12,7 +12,7 @@ class Router {
 
     ready() {
         this.isReady = true;
-        console.log('✅ Router ready, processing initial route');
+        
         
         // Procesar la ruta inicial o pendiente
         this.handleRouteChange();
@@ -26,7 +26,7 @@ class Router {
      */
     register(path, view, handler = null) {
         this.routes[path] = { view, handler };
-        console.log(`📝 Ruta registrada: ${path} → ${view}`);
+        //
     }
     
     /**
@@ -77,7 +77,7 @@ class Router {
     handleRouteChange() {
         // ✅ Si no está listo, guardar para procesar después
         if (!this.isReady) {
-            console.log('⏳ Router not ready yet, pending route...');
+            
             this.pendingRoute = this.getCurrentPath();
             return;
         }
@@ -102,7 +102,7 @@ class Router {
                 }
             }));
             
-            console.log(`📍 Ruta: ${currentPath}`, this.params);
+            //
         } else {
             console.warn(`Ruta no encontrada: ${currentPath}`);
             this.navigate('/dashboard'); // Fallback

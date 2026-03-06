@@ -41,7 +41,7 @@ export default defineConfig({
 
           // Debug: ver qué está pasando
           if (names.length > 0 && names[0]?.endsWith('.css')) {
-            console.log('CSS names:', names); // ← Agrega esto
+             // ← Agrega esto
           }
 
           // Mantener las banderas en img/

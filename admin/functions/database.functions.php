@@ -18,7 +18,7 @@ class Juzt_Raffle_Database
 
     public function __construct()
     {
-        add_action('after_setup_theme', array($this, 'check_database'));
+        //add_action('after_setup_theme', array($this, 'check_database'));
     }
 
     // ✅ Obtener instancia única
@@ -37,6 +37,8 @@ class Juzt_Raffle_Database
         if (version_compare($installed_version, self::DB_VERSION, '<')) {
             $this->create_tables();
             update_option(self::DB_VERSION_OPTION, self::DB_VERSION);
+        } else {
+            //wp_admin_notice('Raffle tables migrate', ["type" => "success"]);
         }
     }
 

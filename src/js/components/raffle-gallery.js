@@ -35,13 +35,13 @@ class RaffleGallery extends LitElement {
     initSplide() {
         try {
             const options = JSON.parse(this.config);
-            console.log('Config parseado:', options);
+            
             
             const splideElement = this.querySelector('.splide');
             if (splideElement) {
                 this.splideInstance = new Splide(splideElement, options);
                 this.splideInstance.mount();
-                console.log('Splide montado!');
+                
             }
         } catch (error) {
             console.error('Error al parsear config:', error);

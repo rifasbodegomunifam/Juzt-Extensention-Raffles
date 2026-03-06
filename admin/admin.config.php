@@ -12,8 +12,14 @@ class AdminConfig
         add_action('admin_enqueue_scripts', [$this, 'addMediaLibrary']);
         add_action('admin_head', [$this, 'addStyleForAdmin']);
         add_action('admin_menu', [$this, 'addAdminPage']);
+        add_action('admin_init', [$this, 'initialize_database']);
         
         new JuztRaffleCtp();
+    }
+
+    public function initialize_database(){
+        $db = new Juzt_Raffle_Database();
+        $db->check_database();
     }
 
     public function addMediaLibrary($hook)

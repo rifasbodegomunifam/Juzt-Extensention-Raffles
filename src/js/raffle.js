@@ -41,12 +41,12 @@ window.addEventListener("alpine:init", () => {
         modal: null,
         
         init() {
-            console.log("🎟️ Juzt Raffle Admin inicializado");
+            
 
             window.addEventListener("route-changed", (e) => {
                 this.currentView = e.detail.view;
                 this.routerParams = e.detail.params;
-                console.log("📍 Vista cambiada:", e.detail.view, e.detail.params);
+                
             });
 
             this.currentView = RaffleApp.router.currentRoute || "dashboard";
@@ -76,12 +76,12 @@ window.addEventListener("alpine:init", () => {
     Alpine.data("RaffleAppRaffleFormView", () => RaffleApp.controllers.raffle.formData());
     Alpine.data("RaffleAppNewOrderView", () => RaffleApp.controllers.newOrder.data());
 
-    console.log("✅ Alpine configurado correctamente");
+    
 });
 
 // ✅ Cuando Alpine esté completamente inicializado
 document.addEventListener('alpine:initialized', () => {
-    console.log('✅ Alpine initialized');
+    
     
     // ✅ Marcar router como listo DESPUÉS de Alpine
     RaffleApp.router.ready();

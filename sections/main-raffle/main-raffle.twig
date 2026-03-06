@@ -1,43 +1,44 @@
-{% set raffle_prizes = get_post_meta("_raffle_prizes", post.id) %}
-{% set raffle_gallery  = get_post_meta("_raffle_gallery", post.id) %}
-{% set raffle_date  = get_post_meta("_raffle_date", post.id) %}
-{% set raffle_price  = get_post_meta("_raffle_price", post.id) %}
-{% set raffle_show_one = get_post_meta("_raffle_buy_from_one", post.id) %}
-{% set raffle_price_cop = exchange_api_convert(raffle_price, "usd", "cop") %}
-{% set raffle_price_ves = exchange_api_convert(raffle_price, "usd", "ves") %}
-{% set allow_installments = get_post_meta('_raffle_allow_installments', post.id) %}
-{% set limit = get_post_meta('_raffle_ticket_limit', post.id) %}
+{% if post %}
+	{% set raffle_prizes = get_post_meta("_raffle_prizes", post.id) %}
+	{% set raffle_gallery  = get_post_meta("_raffle_gallery", post.id) %}
+	{% set raffle_date  = get_post_meta("_raffle_date", post.id) %}
+	{% set raffle_price  = get_post_meta("_raffle_price", post.id) %}
+	{% set raffle_show_one = get_post_meta("_raffle_buy_from_one", post.id) %}
+	{% set raffle_price_cop = exchange_api_convert(raffle_price, "usd", "cop") %}
+	{% set raffle_price_ves = exchange_api_convert(raffle_price, "usd", "ves") %}
+	{% set allow_installments = get_post_meta('_raffle_allow_installments', post.id) %}
+	{% set limit = get_post_meta('_raffle_ticket_limit', post.id) %}
 
-{% set share_title = "¡Participa en " ~ post.title ~ "!" %}
-{% set share_description = "Sorteo de " ~ post.title ~ " - No te lo pierdas" %}
-{% set share_uri = post.link %}
+	{% set share_title = "¡Participa en " ~ post.title ~ "!" %}
+	{% set share_description = "Sorteo de " ~ post.title ~ " - No te lo pierdas" %}
+	{% set share_uri = post.link %}
 
-{% set payment_options = fn('get_option', 'juzt_payment_methods', []) %}
+	{% set payment_options = fn('get_option', 'juzt_payment_methods', []) %}
 
-{% set payments_transformed = [] %}
+	{% set payments_transformed = [] %}
 
-{% for payment in payment_options %}
-    {% set payment_copy = payment %}
-    
-    {# Si logo_bank es numérico, obtener URL #}
-    {% if payment.image is not empty %}
-        {% set logo_url = payment.image | attachment_url %}
-		{% set logo_srcset = payment.image | attachment_srcset %}
-        {% set payment_copy = payment_copy | merge({
+	{% for payment in payment_options %}
+		{% set payment_copy = payment %}
+
+		{# Si logo_bank es numérico, obtener URL #}
+		{% if payment.image is not empty %}
+			{% set logo_url = payment.image | attachment_url %}
+			{% set logo_srcset = payment.image | attachment_srcset %}
+			{% set payment_copy = payment_copy | merge({
             settings: payment | merge({
                 logo_bank: logo_url,
 				logo_bank_srcset: logo_srcset,
 				open: false
             })
         }) %}
-    {% endif %}
-    
-    {% set payments_transformed = payments_transformed | merge([payment_copy]) %}
-{% endfor %}
+		{% endif %}
 
-{% set missing_tickets = get_missing_tickets(post.id) %}
+		{% set payments_transformed = payments_transformed | merge([payment_copy]) %}
+	{% endfor %}
 
-<style>
+	{% set missing_tickets = get_missing_tickets(post.id) %}
+
+	<style>
 	.custom-scrollbar::-webkit-scrollbar {
 		width: 6px;
 	}
@@ -54,57 +55,62 @@
 	}
 </style>
 
-<div class="min-h-screen py-8">
-	<div class="px-4 mx-auto md:px-4 max-w-7xl">
+	<div	class="min-h-screen py-8">
+		<div	class="px-4 mx-auto md:px-4 max-w-7xl">
 
-		<!-- Grid Principal: 2 Columnas -->
-		<div
-			class="grid gap-6 grid-cols-1 lg:grid-cols-4">
+			<!-- Grid Principal: 2 Columnas -->
+			<div	class="grid gap-6 grid-cols-1 lg:grid-cols-4">
 
-			<!-- COLUMNA IZQUIERDA - 2/3 del ancho -->
-			<div
-				class="space-y-6 lg:col-span-2">
+				<!-- COLUMNA IZQUIERDA - 2/3 del ancho -->
+				<div	class="space-y-6 lg:col-span-2">
 
-				<!-- Imagen del Producto -->
-				<div
-					class="bg-[#1a1a1a] rounded-xl w-full">
+					<!-- Imagen del Producto -->
+					<div	class="bg-[#1a1a1a] rounded-xl w-full">
 
-					{% if raffle_gallery | length > 1  %}
+						{% if raffle_gallery | length > 1 %}
 
-					<raffle-gallery class="block" config='{"perPage": 1, "pagination": true, "perMove": 1, "type": "loop", "rewind": true, "arrows": false}'>
-						{% for image in raffle_gallery %}
-						<li class="w-full h-full border border-gray-800 rounded-xl splide__slide">
-							<figure class="mb-0! w-full h-full overflow-hidden rounded-xl">
-								<img sizes="(max-width: 640px) 100vw, 
-           (max-width: 1024px) 50vw, 
-           33vw" class="object-cover w-full h-48" loading="lazy" class="object-cover w-full h-full rounded-xl" srcset="{{ image | attachment_srcset }}" alt="Slide Raffle" />
+							<raffle-gallery	class="block"	config='{"perPage": 1, "pagination": true, "perMove": 1, "type": "loop", "rewind": true, "arrows": false}'>
+								{% for image in raffle_gallery %}
+									<li	class="w-full h-full border border-gray-800 rounded-xl splide__slide">
+										<figure	class="mb-0! w-full h-full overflow-hidden rounded-xl">
+											<img	sizes="(max-width: 640px) 100vw,
+												(max-width: 1024px) 50vw,
+											33vw"	class="object-cover w-full h-48"	loading="lazy"	class="object-cover w-full h-full rounded-xl"	srcset="{{ image | attachment_srcset }}"	alt="Slide Raffle" />
+										</figure>
+									</li>
+								{% endfor %}
+							</raffle-gallery>
+
+						{% else %}
+							<figure	class="mb-0! w-full h-full overflow-hidden rounded-xl border border-gray-800">
+								<img	loading="lazy"	class="object-cover w-full h-full rounded-xl"	srcset="{{ raffle_gallery[0] | attachment_srcset }}"	sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"	alt="Raffle Image" />
 							</figure>
-						</li>
-						{% endfor %}
-					</raffle-gallery>
-
-					{% else %}
-					<figure class="mb-0! w-full h-full overflow-hidden rounded-xl border border-gray-800">
-						<img loading="lazy" class="object-cover w-full h-full rounded-xl" srcset="{{ raffle_gallery[0] | attachment_srcset }}" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" alt="Raffle Image" />
-					</figure>
-					{% endif %}
-				</div>
-
-				<header class="mb-6">
-					<h1 class="text-2xl lg:text-4xl text-center font-bold text-red-500">{{ post.title }}</h1>
-					<div class="flex flex-col md:flex-row md:justify-between items-center mt-4">
-						<div class="text-md text-center text-gray-400">
-							{{ missing_tickets }} de {{ limit }} boletos disponibles
-						</div>
-						<progress class="bg-red-600 w-full h-4 mt-4 rounded-xl overflow-hidden" value="{{ missing_tickets }}" max="{{ limit }}">
-							<div class="bg-red-600 h-full" style="width: {{ ((limit - missing_tickets) / limit) * 100 }}%"></div>
-						</progress>
+						{% endif %}
 					</div>
-				</header>
 
-				<!-- Imagen del Producto -->
-				<div class="block lg:hidden">
-					{{ snippet('raffle-form', {
+					<header	class="mb-6">
+						<h1	class="text-2xl lg:text-4xl text-center font-bold text-red-500">
+							{{ post.title }}
+						</h1>
+						<div	class="flex flex-col md:flex-row md:justify-between items-center mt-4">
+							<div	class="text-md text-center text-gray-400">
+								{{ missing_tickets }}
+								de
+								{{ limit }}
+								boletos disponibles
+							</div>
+							{% set limit_int = limit | default(0) | number_format(0, '.', '') | replace({',': ''}) %}
+							{% set missing_int = missing_tickets | default(0) | number_format(0, '.', '') | replace({',': ''}) %}
+
+							<progress	class="bg-red-600 w-full h-4 mt-4 rounded-xl overflow-hidden"	value="{{ missing_int }}"	max="{{ limit_int }}">
+								<div	class="bg-red-600 h-full"	style="width: {{ limit_int > 0 ? (((limit_int - missing_int) / limit_int) * 100) : 0 }}%"></div>
+							</progress>
+						</div>
+					</header>
+
+					<!-- Imagen del Producto -->
+					<div	class="block lg:hidden">
+						{{ snippet('raffle-form', {
 						raffle: post.id, 
 						price: raffle_price, 
 						cop: raffle_price_cop, 
@@ -113,64 +119,79 @@
 						show_one: raffle_show_one,
 						allow_installments: allow_installments
 					}) }}
-				</div>
+					</div>
 
-				<div
-					class="bg-[#1a1a1a] rounded-2xl p-4 md:p-6 border border-gray-800">
+					<div	class="bg-[#1a1a1a] rounded-2xl p-4 md:p-6 border border-gray-800">
 
-					<!-- Precio -->
-					<div class="p-4 mb-6 border bg-linear-to-br from-red-600/20 to-red-600/5 border-red-600/30 rounded-xl">
-						<div class="mb-3 text-lg text-white text-center">Precio por boleto</div>
-						<div class="mb-1 text-md md:text-2xl font-bold text-white text-center flex gap-1 items-center justify-center">
-							<span class="">{{ format_currency(raffle_price, 'USD') }}</span> | 
-							{{ raffle_price_cop.conversion_result == 0 ? '<span class="text-xs text-center w-30 block items-center">Conversion no disponible</span>' | raw : format_currency(raffle_price_cop.conversion_result, 'COP') }} | 
-							{{ raffle_price_ves.conversion_result == 0 ? '<span class="text-xs text-center w-30 block items-center">Conversion no disponible</span>' | raw : format_currency(raffle_price_ves.conversion_result, 'VES') }}
+						<!-- Precio -->
+						<div	class="p-4 mb-6 border bg-linear-to-br from-red-600/20 to-red-600/5 border-red-600/30 rounded-xl">
+							<div	class="mb-3 text-lg text-white text-center">
+								Precio por boleto
+							</div>
+							<div	class="mb-1 text-md md:text-2xl font-bold text-white text-center flex gap-1 items-center justify-center">
+								<span	class="">
+									{{ format_currency(raffle_price, 'USD') }}
+								</span>
+								|
+								{{ raffle_price_cop.conversion_result == 0 ? '<span class="text-xs text-center w-30 block items-center">Conversion no disponible</span>' | raw : format_currency(raffle_price_cop.conversion_result, 'COP') }}
+								|
+								{{ raffle_price_ves.conversion_result == 0 ? '<span class="text-xs text-center w-30 block items-center">Conversion no disponible</span>' | raw : format_currency(raffle_price_ves.conversion_result, 'VES') }}
+							</div>
+						</div>
+
+						<!-- Countdown -->
+						<div	class="p-4 mb-6 text-white bg-red-600 rounded-xl">
+							<div	class="mb-3 text-center">
+								<div	class="mb-1 text-sm">
+									Sorteo en:
+								</div>
+								<div	class="text-md opacity-75">
+									{{ raffle_date|date_format('d M, Y - g:i A') }}
+								</div>
+							</div>
+							<!--LIT-->
+							<raffle-countdown	date="{{ raffle_date }}" />
 						</div>
 					</div>
 
-					<!-- Countdown -->
-					<div class="p-4 mb-6 text-white bg-red-600 rounded-xl">
-						<div class="mb-3 text-center">
-							<div class="mb-1 text-sm">Sorteo en:</div>
-							<div class="text-md opacity-75">{{ raffle_date|date_format('d M, Y - g:i A') }}</div>
+					<!-- Share -->
+
+					{{ snippet('share-banner', { facebook: share_url('facebook', share_uri, share_title), twitter: share_url('twitter', share_uri, share_title), whatsapp: share_url('whatsapp', share_uri, share_title) }) }}
+
+					<!-- Descripción -->
+					<div	class="bg-[#1a1a1a] hidden rounded-2xl p-4 md:p-6 border border-gray-800">
+						<h2	class="mb-4 text-2xl font-bold text-white">
+							Descripción del Premio
+						</h2>
+
+						<div	class="mb-5">
+							{{ post.content }}
 						</div>
-						<!--LIT-->
-						<raffle-countdown date="{{ raffle_date }}" />
+
+						<h3	class="mb-5 text-lg font-bold text-white">
+							Características Principales:
+						</h3>
+						<ul	class="space-y-2">
+							{% for prize in raffle_prizes %}
+								<li>
+									{{ snippet('prizes-card', { prize: prize }) }}
+								</li>
+							{% endfor %}
+						</ul>
 					</div>
 				</div>
 
-				<!-- Share -->
-				
-				{{ snippet('share-banner', { facebook: share_url('facebook', share_uri, share_title), twitter: share_url('twitter', share_uri, share_title), whatsapp: share_url('whatsapp', share_uri, share_title) }) }}
+				<!-- COLUMNA DERECHA - 1/3 del ancho -->
+				<div class="sticky lg:col-span-2 rounded-xl">
+					<div class="">
+						<div class="bg-[#1a1a1a] rounded-2xl p-4 md:p-6 border border-gray-800">
+							<!-- Números -->
+							<h3	class="mb-3 text-center text-2xl font-semibold text-white">
+								Completa tu suerte!
+							</h3>
 
-				<!-- Descripción -->
-				<div class="bg-[#1a1a1a] hidden rounded-2xl p-4 md:p-6 border border-gray-800">
-					<h2 class="mb-4 text-2xl font-bold text-white">Descripción del Premio</h2>
-
-					<div class="mb-5">
-						{{ post.content }}
-					</div>
-
-					<h3 class="mb-5 text-lg font-bold text-white">Características Principales:</h3>
-					<ul class="space-y-2">
-						{% for prize in raffle_prizes %}
-							<li>
-								{{ snippet('prizes-card', { prize: prize }) }}
-							</li>
-						{% endfor %}
-					</ul>
-				</div>
-			</div>
-
-			<!-- COLUMNA DERECHA - 1/3 del ancho -->
-			<div class="sticky lg:col-span-2 rounded-xl">
-				<div class="">
-					<div class="bg-[#1a1a1a] rounded-2xl p-4 md:p-6 border border-gray-800">
-						<!-- Números -->
-						<h3 class="mb-3 text-center text-2xl font-semibold text-white"> Completa tu suerte!</h3>
-
-						<div class="hidden lg:block">
-							{{ snippet('raffle-form', {
+							<div class="hidden lg:block">
+								{{ snippet('raffle-form', {
 								raffle: post.id, 
 								price: raffle_price, 
 								cop: raffle_price_cop, 
@@ -178,49 +199,57 @@
 								payments: payments_transformed,
 								show_one: raffle_show_one
 							}) }}
-						</div>
+							</div>
 
-						<!-- Trust -->
-						<div class="grid grid-cols-3 gap-2 pt-4 border-t border-gray-800">
-							<div class="text-center">
-								<div class="flex items-center justify-center w-10 h-10 mx-auto mb-1 rounded-lg bg-red-600/20">
-									<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-									</svg>
+							<!-- Trust -->
+							<div class="grid grid-cols-3 gap-2 pt-4 border-t border-gray-800">
+								<div class="text-center">
+									<div class="flex items-center justify-center w-10 h-10 mx-auto mb-1 rounded-lg bg-red-600/20">
+										<svg class="w-5 h-5 text-red-600"	fill="none"	stroke="currentColor"	viewbox="0 0 24 24">
+											<path stroke-linecap="round"	stroke-linejoin="round"	stroke-width="2"	d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+										</svg>
+									</div>
+									<div class="text-xs text-gray-400">
+										Seguro
+									</div>
 								</div>
-								<div class="text-xs text-gray-400">Seguro</div>
-							</div>
-							<div class="text-center">
-								<div class="flex items-center justify-center w-10 h-10 mx-auto mb-1 rounded-lg bg-red-600/20">
-									<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-									</svg>
+								<div	class="text-center">
+									<div	class="flex items-center justify-center w-10 h-10 mx-auto mb-1 rounded-lg bg-red-600/20">
+										<svg	class="w-5 h-5 text-red-600"	fill="none"	stroke="currentColor"	viewbox="0 0 24 24">
+											<path	stroke-linecap="round"	stroke-linejoin="round"	stroke-width="2"	d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+										</svg>
+									</div>
+									<div	class="text-xs text-gray-400">
+										Verificado
+									</div>
 								</div>
-								<div class="text-xs text-gray-400">Verificado</div>
-							</div>
-							<div class="text-center">
-								<div class="flex items-center justify-center w-10 h-10 mx-auto mb-1 rounded-lg bg-red-600/20">
-									<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-									</svg>
+								<div	class="text-center">
+									<div	class="flex items-center justify-center w-10 h-10 mx-auto mb-1 rounded-lg bg-red-600/20">
+										<svg	class="w-5 h-5 text-red-600"	fill="none"	stroke="currentColor"	viewbox="0 0 24 24">
+											<path	stroke-linecap="round"	stroke-linejoin="round"	stroke-width="2"	d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+										</svg>
+									</div>
+									<div	class="text-xs text-gray-400">
+										Gratis
+									</div>
 								</div>
-								<div class="text-xs text-gray-400">Gratis</div>
 							</div>
-						</div>
 
+						</div>
 					</div>
 				</div>
-			</div>
 
+			</div>
 		</div>
 	</div>
-</div>
 
-{{ localize_script('JuztExtensionRaffle', {
-    nonce: wp_nonce('wp_rest'),
-    apiUrl: '/wp-json/juzt-raffle-extension/frontend/v1'
-}) }}
+	{{ localize_script('JuztExtensionRaffle', { nonce: wp_nonce('wp_rest'), apiUrl: '/wp-json/juzt-raffle-extension/frontend/v1' }) }}
 
-{{ enqueue_asset('js', 'detail-raffle', '/js/raffleDetail.js', asset_source) }} 
-{{ enqueue_asset('css', 'detail-raffle-css', '/css/raffleDetail.css', asset_source) }}
+	{{ enqueue_asset('js', 'detail-raffle', '/js/raffleDetail.js', asset_source) }}
+	{{ enqueue_asset('css', 'detail-raffle-css', '/css/raffleDetail.css', asset_source) }}
 
+{% else %}
+	<div class="bg-red-500 rounded-md border border-red-500 max-w-5xl my-5 mx-auto px-5 py-8 w-full">
+		<h2 class="text-white text-2xl text-center">Post no loaded</h2>
+	</div>
+{% endif %}

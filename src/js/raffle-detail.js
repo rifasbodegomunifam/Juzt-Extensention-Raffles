@@ -6,4 +6,3 @@ import "./components/raffle-countdown";
 
 createIcons( { icons } );
 
-console.log("Details mul");

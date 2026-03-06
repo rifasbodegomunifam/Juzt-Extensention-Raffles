@@ -56,6 +56,7 @@ return [
         ],
     ],
     'adminAssets' => [
+        'page_only' => 'toplevel_page_juzt-raffle', // Slug de la página de admin donde se cargarán estos assets
         'development' => [
             'js' => [
                 'juzt-raffle-admin-script'       => '/src/js/raffle.js'

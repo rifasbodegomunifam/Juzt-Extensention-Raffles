@@ -389,7 +389,7 @@ class RaffleForm extends LitElement {
             }
         }
 
-        console.log("loading", this.loading);
+        
     }
 
     incrementQuantity() {
@@ -472,7 +472,7 @@ class RaffleForm extends LitElement {
                 file: file,
                 preview: e.target.result // Base64 para preview
             };
-            console.log(this.selectedFile);
+            
         };
         reader.readAsDataURL(file);
     }
@@ -508,10 +508,10 @@ class RaffleForm extends LitElement {
         };
 
         try {
-            console.log('Datos del formulario:', data);
+            
             const order_create = await HandleRequest.saveOrder(data);
 
-            console.log('Orden creada:', order_create);
+            
 
             this.proccesing = false;
             this.cta_text = "Orden creada, redirigiendo en 5 segundos";

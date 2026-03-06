@@ -24,7 +24,7 @@ class OrderController {
             },
 
             init() {
-                console.log("📄 OrderController inicializado");
+                
                 this.checkAndLoadOrder(); // ✅ FALTABA ESTA LÍNEA
 
                 window.addEventListener('route-changed', (e) => {
@@ -36,7 +36,7 @@ class OrderController {
 
             checkAndLoadOrder() {
                 const orderId = window.RaffleAppAdmin.router.getParam('id');
-                console.log("Order ID desde ruta:", orderId);
+                
 
                 if (orderId && orderId !== this.order?.id) {
                     this.loadOrder(orderId);
@@ -47,7 +47,7 @@ class OrderController {
                 this.loading = true;
                 try {
                     this.order = await orderModel.getById(id);
-                    console.log("✅ Orden cargada:", this.order);
+                    
                 } catch (error) {
                     console.error("❌ Error cargando orden:", error);
                     this.order = null;

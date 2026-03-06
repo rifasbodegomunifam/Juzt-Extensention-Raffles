@@ -23,12 +23,12 @@ class DashboardController {
             },
             
             init() {
-                console.log("📊 Dashboard inicializado");
+                
                 this.loadOrders();
                 
                 window.addEventListener('route-changed', (e) => {
                     if (e.detail.view === 'dashboard') {
-                        console.log("🔄 Volviendo al dashboard - Recargando órdenes");
+                        
                         this.loadOrders();
                     }
                 });
@@ -55,7 +55,7 @@ class DashboardController {
                     this.selectedOrders = [];
                     this.loadOrders();
 
-                    console.log("res", response);
+                    
                 } catch (error){
                     this.selectedOrders = [];
                     showToast("Error aplicando la acción masiva", "error");
@@ -77,7 +77,7 @@ class DashboardController {
                 this.loading = true;
                 try {
                     this.orders = await orderModel.getAll(this.filters);
-                    console.log("✅ Órdenes cargadas:", this.orders.length);
+                    
                 } catch (error) {
                     console.error("❌ Error cargando órdenes:", error);
                     this.orders = [];

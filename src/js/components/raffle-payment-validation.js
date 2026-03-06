@@ -34,7 +34,7 @@ class RafflePaymentValidation extends LitElement {
 
     constructor() {
         super();
-        console.log("RafflePaymentValidation component");
+        
         this.step = null;
         this.loading = false;
         this.steps = [
@@ -244,7 +244,7 @@ class RafflePaymentValidation extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
-        console.log("RafflePaymentValidation component connected to the DOM");
+        
     }
 
     render() {

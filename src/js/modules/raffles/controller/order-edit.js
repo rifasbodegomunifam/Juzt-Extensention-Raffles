@@ -44,14 +44,14 @@ class NewOrderController {
             loading: false,
 
             async init() {
-                console.log("📝 NewOrder inicializado");
+                
                 this.resetForm();
                 await this.loadRaffles();
 
                 // Escuchar cambios de ruta
                 window.addEventListener('route-changed', (e) => {
                     if (e.detail.view === 'order-form') {
-                        console.log("🔄 Route changed - Reseteando formulario");
+                        
                         this.resetForm();
                         this.loadRaffles();
                     }
@@ -72,14 +72,14 @@ class NewOrderController {
                 };
                 this.selectedRaffle = null;
                 this.totalAmount = 0;
-                console.log("✅ Formulario de orden reseteado");
+                
             },
 
             async loadRaffles() {
                 try {
                     const allRaffles = await raffleModel.getAll();
                     this.raffles = allRaffles.filter(r => r.status === 'active');
-                    console.log("✅ Rifas activas cargadas:", this.raffles.length);
+                    
                 } catch (error) {
                     console.error("❌ Error cargando rifas:", error);
                     this.raffles = [];
@@ -100,7 +100,7 @@ class NewOrderController {
                 }
 
                 this.calculateTotal();
-                console.log("Rifa seleccionada:", this.selectedRaffle);
+                
             },
 
             calculateTotal() {
@@ -113,7 +113,7 @@ class NewOrderController {
             },
 
             async submitOrder() {
-                console.log("📤 Enviando orden:", this.order);
+                
 
                 // Validaciones
                 if (!this.order.raffle_id) {
@@ -150,7 +150,7 @@ class NewOrderController {
                         payment_installments: this.order.payment_installments
                     });
 
-                    console.log("✅ Resultado:", result);
+                    
 
                     if (result.success) {
                         alert(`Orden creada exitosamente\nNúmero de orden: ${result.order_number}`);

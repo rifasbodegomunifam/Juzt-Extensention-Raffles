@@ -16,12 +16,12 @@ class RaffleController {
       statusFilter: "",
 
       async init() {
-        console.log("🎟️ RaffleList inicializado");
+        
         await this.loadRaffles();
 
         window.addEventListener("route-changed", (e) => {
           if (e.detail.view === "raffle-list") {
-            console.log("🔄 Volviendo a lista de rifas - Recargando datos");
+            
             this.loadRaffles();
           }
         });
@@ -31,7 +31,7 @@ class RaffleController {
         this.loading = true;
         try {
           this.raffles = await raffleModel.getAll();
-          console.log("✅ Rifas cargadas:", this.raffles.length);
+          
         } catch (error) {
           console.error("❌ Error cargando rifas:", error);
           this.raffles = [];
@@ -166,12 +166,12 @@ class RaffleController {
       isEditing: false,
 
       init() {
-        console.log("📝 RaffleForm inicializado");
+        
         this.checkAndLoadRaffle();
 
         window.addEventListener('route-changed', (e) => {
           if (e.detail.view === 'raffle-form') {
-            console.log("🔄 Route changed en formulario:", e.detail);
+            
             this.checkAndLoadRaffle();
           }
         });
@@ -179,7 +179,7 @@ class RaffleController {
 
       checkAndLoadRaffle() {
         const raffleId = window.RaffleAppAdmin.router.getParam('id');
-        console.log("🔍 Verificando ID de rifa:", raffleId);
+        
 
         if (raffleId && raffleId !== this.raffle.id) {
           // Modo edición
@@ -187,7 +187,7 @@ class RaffleController {
           this.loadRaffle(raffleId);
         } else if (!raffleId) {
           // ✅ Modo creación - Resetear formulario
-          console.log("➕ Modo creación - Reseteando formulario");
+          
           this.isEditing = false;
           this.resetForm();
         }
@@ -219,7 +219,7 @@ class RaffleController {
         try {
           const data = await raffleModel.getById(id);
 
-          console.log("HOLA", data);
+          
 
           if (data) {
             this.raffle.id = data.id;
@@ -301,7 +301,7 @@ class RaffleController {
 
 
       async saveRaffle() {
-        console.log("💾 Guardando rifa:", this.raffle);
+        
 
         if (!this.raffle.title || !this.raffle.price || !this.raffle.ticket_limit) {
           alert('Por favor completa todos los campos obligatorios');
@@ -314,14 +314,14 @@ class RaffleController {
           let result;
 
           if (this.isEditing) {
-            console.log("📝 Actualizando rifa ID:", this.raffle.id);
+            
             result = await raffleModel.update(this.raffle.id, this.raffle);
           } else {
-            console.log("➕ Creando nueva rifa");
+            
             result = await raffleModel.create(this.raffle);
           }
 
-          console.log("✅ Resultado:", result);
+          
 
           if (result.success) {
             alert(this.isEditing ? 'Rifa actualizada exitosamente' : 'Rifa creada exitosamente');

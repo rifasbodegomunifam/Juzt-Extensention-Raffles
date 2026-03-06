@@ -34,13 +34,13 @@ class RaffleAdminApp {
             payment: new PaymentController(),
         };
         
-        console.log('📦 RaffleAdminApp instanciada (router pendiente)');
+        
     }
     
     // ✅ Método para inicializar router DESPUÉS de registrar rutas
     initRouter() {
         this.router = new AppRouter();
-        console.log('🚦 Router inicializado');
+        
     }
 }
 

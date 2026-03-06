@@ -28,7 +28,7 @@ class PaymentController {
 
             init() {
 
-                console.log('PaymentController initialized');
+                
                 this.getAll();
 
                 window.addEventListener('route-changed', (e) => {
@@ -112,7 +112,7 @@ class PaymentController {
                 const data = await response.json();
 
                 if (data.success) {
-                    console.log('✅ Eliminado exitosamente');
+                    
                     this.getAll();
                     alert('Metodo de pago eliminado');
                 } else {
@@ -139,7 +139,7 @@ class PaymentController {
             },
 
             async updatePayment() {
-                console.log('Guardar:', this.payment);
+                
 
                 try {
                     const formData = new FormData();
@@ -170,7 +170,7 @@ class PaymentController {
                     const data = await response.json();
 
                     if (data.success) {
-                        console.log('✅ Guardado exitosamente');
+                        
                         this.closeModal();
                         this.getAll();
                         this.resetForm();
@@ -186,7 +186,7 @@ class PaymentController {
             },
 
             async savePayment() {
-                console.log('Guardar:', this.payment);
+                
 
                 try {
                     const formData = new FormData();
@@ -216,7 +216,7 @@ class PaymentController {
                     const data = await response.json();
 
                     if (data.success) {
-                        console.log('✅ Guardado exitosamente');
+                        
                         this.closeModal();
                         this.getAll();
                         this.resetForm();
@@ -277,7 +277,7 @@ class PaymentController {
 
             selectGallery() {
                 this.openMediaLibrary('single', (attachments) => {
-                    console.log(attachments);
+                    
                     this.payment.image = attachments.id; // Guardar solo la URL de la imagen
                 });
             },
